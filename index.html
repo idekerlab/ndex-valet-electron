@@ -1,19 +1,69 @@
-<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400' rel='stylesheet' type='text/css'>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react-with-addons.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/1.0.0/fetch.min.js"></script>
+    <script src="CyFramework/build/CyFramework.js"></script>
+    <script src="NDExStore/build/NDExStore.js"></script>
+    <script src="NDExStore/build/NDExValet.map.js"></script>
+    <script src="NDExValet/build/NDExValet.js"></script>
+    
+    <title>NDEx Valet</title>
   </head>
   <body>
-    <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using node <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
-  </body>
+    <div id='valet'>
+    </div>
+    <script>
 
-  <script>
-    // You can also require other files to run in this process
-    require('./renderer.js')
-  </script>
+      //Create the framework instance
+      var cyto = CyFramework.config([NDExValet, NDExStore])
+
+      //Render NDEx Valet into the div
+      cyto.render(NDExValet, document.getElementById('valet'), {
+        onLoad: function(networkIds) {
+          console.log(networkIds)
+          networkIds.map(function(N) {
+            console.log(N.externalId);
+            fetch('http://localhost:1234/v1/networks?source=url&format=cx', {
+              method: 'post',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(["http://dev2.ndexbio.org/rest/network/"+ N.externalId +"/asCX"])
+            })
+          })
+        }
+      })
+
+      //Connect to CyRest with a web socket connecton
+      var cySocket = new WebSocket("ws://localhost:8025/ws/echo");
+
+      cySocket.onopen = function() {
+        var msg = {
+          from: "ndex",
+          type: "connected",
+          body: ""
+        }
+        cySocket.send(JSON.stringify(msg));
+      }
+
+      //Listen for messages
+      cySocket.onmessage = function(event) {
+        var msg = JSON.parse(event.data)
+        switch(msg.type) {
+          case "focus":
+            //Bring NDEx Valet into focus
+            window.show()
+          break;
+          case "query":
+            //Send updates to stores
+            cyto.dispatch({type:"UPDATE_QUERY", query: msg.body})
+            break;
+        }
+      }
+    </script>
+  </body>
 </html>
