@@ -59,7 +59,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.store = exports.storeName = exports.component = undefined;
+	exports.fieldActions = exports.cartActions = exports.store = exports.storeName = exports.component = undefined;
 	
 	var _redux = __webpack_require__(1);
 	
@@ -93,16 +93,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	(0, _reactTapEventPlugin2.default)();
+	
 	//Make these third party deps
 	
-	(0, _reactTapEventPlugin2.default)();
 	
 	__webpack_require__(254);
 	
 	function mapStateToProps(state) {
 	  return {
 	    fields: state.valet.fields,
-	    cart: state.ndex.cart,
+	    cart: state.valet.cart,
 	    creds: state.ndex.credentials,
 	    lucene: state.ndex.lucene
 	  };
@@ -121,11 +122,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var storeName = 'valet';
 	
-	var store = { fields: fieldActions.default };
+	var store = { fields: fieldActions.default, cart: cartActions.default };
 	
 	exports.component = component;
 	exports.storeName = storeName;
 	exports.store = store;
+	exports.cartActions = cartActions;
+	exports.fieldActions = fieldActions;
 
 /***/ },
 /* 1 */
@@ -2216,26 +2219,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TopBar).call(this, props));
 	
-	    _this.handleCart = function () {
-	      _this.setState({ cartOpen: !_this.state.cartOpen });
-	    };
-	
-	    _this.handleLogin = function (event) {
-	      _this.setState({
-	        loginOpen: !_this.state.loginOpen,
-	        anchorEl: event ? event.currentTarget : null
-	      });
-	    };
-	
 	    _this.handleLogout = function () {
 	      _this.props.credActions.logout();
 	    };
 	
-	    _this.state = { cartOpen: false, loginOpen: false };
+	    _this.handleCart = _this.handleCart.bind(_this);
+	    _this.handleLogin = _this.handleLogin.bind(_this);
+	    _this.state = { cartOpen: false, loginOpen: false, anchorEl: null };
 	    return _this;
 	  }
 	
 	  _createClass(TopBar, [{
+	    key: 'handleCart',
+	    value: function handleCart() {
+	      console.log("Handle Cart");
+	      console.log(this.state);
+	      this.setState({ cartOpen: !this.state.cartOpen });
+	    }
+	  }, {
+	    key: 'handleLogin',
+	    value: function handleLogin(event) {
+	      console.log("Handle Login");
+	      console.log(this.state);
+	      this.setState({
+	        loginOpen: !this.state.loginOpen,
+	        anchorEl: event ? event.currentTarget : null
+	      });
+	    }
+	  }, {
 	    key: 'getCredButton',
 	    value: function getCredButton(loggedIn) {
 	      return loggedIn ? {
@@ -2255,7 +2266,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return _react2.default.createElement(
 	        _AppBar2.default,
 	        {
-	          title: 'Network Cart',
+	          title: this.props.cart.size,
 	          iconElementLeft: _react2.default.createElement(
 	            _IconButton2.default,
 	            { onClick: this.handleCart },
@@ -3563,7 +3574,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'insert': 45,
 	  'delete': 46,
 	  'command': 91,
-	  'right click': 93,
+	  'left command': 91,
+	  'right command': 93,
 	  'numpad *': 106,
 	  'numpad +': 107,
 	  'numpad -': 109,
@@ -3604,7 +3616,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'escape': 27,
 	  'spc': 32,
 	  'pgup': 33,
-	  'pgdn': 33,
+	  'pgdn': 34,
 	  'ins': 45,
 	  'del': 46,
 	  'cmd': 91
@@ -9001,6 +9013,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Cart).call(this, props));
 	
+	    _this.handleClear = function () {
+	      _this.props.cartActions.clear();
+	    };
+	
 	    _this.handleClose = function () {
 	      _this.props.handleClose();
 	    };
@@ -9024,6 +9040,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var _this2 = this;
 	
 	      var actions = [_react2.default.createElement(_FlatButton2.default, {
+	        label: 'Clear Networks',
+	        primary: true,
+	        onClick: this.handleClear
+	      }), _react2.default.createElement(_FlatButton2.default, {
 	        label: 'Load Networks',
 	        secondary: true,
 	        onClick: this.handleLoad
@@ -14143,36 +14163,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function Login(props) {
 	    _classCallCheck(this, Login);
 	
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Login).call(this, props));
-	
-	    _this.handleUser = function (event) {
-	      _this.props.fieldActions.updateName(event.target.value);
-	    };
-	
-	    _this.handlePass = function (event) {
-	      _this.props.fieldActions.updatePass(event.target.value);
-	    };
-	
-	    _this.login = function () {
-	      console.log(_this.props.fields);
-	      _this.props.credActions.login(_this.props.fields.get('name'), _this.props.fields.get('pass'));
-	      _this.props.fieldActions.updateName("");
-	      _this.props.fieldActions.updatePass("");
-	      _this.props.handleClose();
-	    };
-	
-	    return _this;
+	    return _possibleConstructorReturn(this, Object.getPrototypeOf(Login).call(this, props));
 	  }
 	
 	  _createClass(Login, [{
+	    key: 'handleUser',
+	    value: function handleUser(event) {
+	      console.log("Event was");
+	      console.log(event);
+	      this.props.fieldActions.updateName(event.target.value);
+	    }
+	  }, {
+	    key: 'handlePass',
+	    value: function handlePass(event) {
+	      this.props.fieldActions.updatePass(event.target.value);
+	    }
+	  }, {
+	    key: 'login',
+	    value: function login() {
+	      console.log(this.props.fields);
+	      this.props.credActions.login(this.props.fields.get('name'), this.props.fields.get('pass'));
+	      this.props.fieldActions.updateName("");
+	      this.props.fieldActions.updatePass("");
+	      this.props.handleClose();
+	    }
+	  }, {
+	    key: 'cancel',
+	    value: function cancel() {
+	      this.props.handleClose();
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	      return _react2.default.createElement(
 	        _Popover2.default,
 	        {
 	          open: this.props.isOpen,
-	          anchorEl: this.props.anchorEl,
-	          onRequestClose: this.props.handleClose
+	          modal: true,
+	          anchorEl: this.props.anchorEl
 	        },
 	        _react2.default.createElement(
 	          'div',
@@ -14182,19 +14210,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	            type: 'username',
 	            hintText: 'Username',
 	            fullWidth: true,
-	            onChange: this.handleUser
+	            onChange: this.handleUser.bind(this)
 	          }),
 	          _react2.default.createElement(_TextField2.default, {
 	            value: this.props.fields.get('pass'),
 	            type: 'password',
 	            hintText: 'Password',
-	            onChange: this.handlePass,
+	            onChange: this.handlePass.bind(this),
 	            fullWidth: true
 	          }),
 	          _react2.default.createElement(_RaisedButton2.default, {
 	            label: 'Login',
+	            primary: true,
+	            onClick: this.login.bind(this),
+	            style: { width: "100%" }
+	          }),
+	          _react2.default.createElement(_RaisedButton2.default, {
+	            label: 'Cancel',
 	            secondary: true,
-	            onClick: this.login,
+	            onClick: this.cancel.bind(this),
 	            style: { width: "100%" }
 	          })
 	        )
@@ -16740,7 +16774,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return _react2.default.createElement('textarea', {
 	        style: style,
 	        placeholder: 'Enter your search terms here...',
-	        value: this.props.fields.query,
+	        value: this.props.fields.get('query'),
 	        onChange: this.handleChange.bind(this)
 	      });
 	    }
@@ -17582,18 +17616,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function List(props) {
 	    _classCallCheck(this, List);
 	
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this, props));
-	
-	    _this.handleSelection = function (S) {
-	      var ns = _this.props.networkSummaries;
-	      S.map(function (N) {
-	        if (!_this.props.cart.has(ns.get(N))) {
-	          _this.props.cartActions.addNetwork(ns.get(N));
-	        }
-	      });
-	    };
-	
-	    return _this;
+	    return _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this, props));
 	  }
 	
 	  _createClass(List, [{
@@ -17609,9 +17632,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return this.props.cart.has(this.props.networkSummaries.get(I));
 	    }
 	  }, {
+	    key: 'handleSelection',
+	    value: function handleSelection(S) {
+	      var _this2 = this;
+	
+	      var ns = this.props.networkSummaries;
+	      S.map(function (N) {
+	        if (!_this2.props.cart.has(ns.get(N))) {
+	          _this2.props.cartActions.addNetwork(ns.get(N));
+	        }
+	      });
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
-	      var _this2 = this;
+	      var _this3 = this;
 	
 	      var networkSummaries = this.props.networkSummaries.toJS();
 	      var tableStyle = {
@@ -17627,7 +17662,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          style: { height: '100%' },
 	          wrapperStyle: { overflow: 'scroll', height: '100%' },
 	          multiSelectable: true,
-	          onRowSelection: this.handleSelection
+	          onRowSelection: this.handleSelection.bind(this)
 	        },
 	        _react2.default.createElement(
 	          _Table.TableHeader,
@@ -17674,8 +17709,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return _react2.default.createElement(
 	              _Table.TableRow,
 	              {
-	                selectable: !_this2.isSelected(I),
-	                selected: _this2.isSelected(I)
+	                selectable: !_this3.isSelected(I),
+	                selected: _this3.isSelected(I)
 	              },
 	              _react2.default.createElement(
 	                _Table.TableRowColumn,
@@ -17700,12 +17735,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	              _react2.default.createElement(
 	                _Table.TableRowColumn,
 	                null,
-	                _this2.time(N.creationTime)
+	                _this3.time(N.creationTime)
 	              ),
 	              _react2.default.createElement(
 	                _Table.TableRowColumn,
 	                null,
-	                _this2.time(N.modificationTime)
+	                _this3.time(N.modificationTime)
 	              )
 	            );
 	          })
@@ -30718,7 +30753,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {object} obj
 	 * @return {object}
 	 */
-	var keyMirror = function (obj) {
+	var keyMirror = function keyMirror(obj) {
 	  var ret = {};
 	  var key;
 	  !(obj instanceof Object && !Array.isArray(obj)) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'keyMirror(...): Argument must be an object.') : invariant(false) : void 0;
@@ -30844,7 +30879,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var warning = emptyFunction;
 	
 	if (process.env.NODE_ENV !== 'production') {
-	  warning = function (condition, format) {
+	  warning = function warning(condition, format) {
 	    for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
 	      args[_key - 2] = arguments[_key];
 	    }
@@ -30892,6 +30927,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * LICENSE file in the root directory of this source tree. An additional grant
 	 * of patent rights can be found in the PATENTS file in the same directory.
 	 *
+	 * 
 	 */
 	
 	function makeEmptyFunction(arg) {
@@ -30905,7 +30941,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * primarily useful idiomatically for overridable function endpoints which
 	 * always need to be callable, since JS lacks a null-call idiom ala Cocoa.
 	 */
-	function emptyFunction() {}
+	var emptyFunction = function emptyFunction() {};
 	
 	emptyFunction.thatReturns = makeEmptyFunction;
 	emptyFunction.thatReturnsFalse = makeEmptyFunction(false);

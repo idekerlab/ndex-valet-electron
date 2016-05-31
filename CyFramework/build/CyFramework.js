@@ -11,41 +11,41 @@
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-
+/******/
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-
+/******/
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
 /******/ 			loaded: false
 /******/ 		};
-
+/******/
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
+/******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-
-
+/******/
+/******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-
+/******/
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-
+/******/
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-
+/******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
 /******/ })
@@ -55,42 +55,42 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-
+	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
+	
 	exports.config = config;
-
+	
 	var _react = __webpack_require__(1);
-
+	
 	var _react2 = _interopRequireDefault(_react);
-
+	
 	var _reactDom = __webpack_require__(2);
-
+	
 	var _reactDom2 = _interopRequireDefault(_reactDom);
-
+	
 	var _redux = __webpack_require__(3);
-
+	
 	var _reactRedux = __webpack_require__(17);
-
+	
 	var _createStore = __webpack_require__(26);
-
+	
 	var _createStore2 = _interopRequireDefault(_createStore);
-
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
+	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
+	
 	var CyFramework = function () {
-
+	
 	  /* Construct the CyFramework by combining stores into one object, and then creating a store using the initial state and store object. */
-
+	
 	  function CyFramework(modules, initialState) {
 	    _classCallCheck(this, CyFramework);
-
+	
 	    console.log(modules);
 	    var stores = modules.reduce(function (subStores, module) {
 	      subStores[module.storeName] = (0, _redux.combineReducers)(module.store);
@@ -98,57 +98,57 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {});
 	    this.store = (0, _createStore2.default)(stores, initialState);
 	  }
-
+	
 	  /* Render a component into the DOM at element. Can additionally accept properties to be passed to the component, and also
 	   * children to be passed for the component to render.
 	   */
-
-
+	
+	
 	  _createClass(CyFramework, [{
 	    key: 'render',
 	    value: function render(module, element) {
 	      var properties = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 	      var children = arguments.length <= 3 || arguments[3] === undefined ? [] : arguments[3];
-
+	
 	      _reactDom2.default.render(_react2.default.createElement(_reactRedux.Provider, { store: this.store }, _react2.default.createElement(module.component, properties, children)), element);
 	      return undefined;
 	    }
-
+	
 	    /* Get store state or get substore state by name of substore */
-
+	
 	  }, {
 	    key: 'getStore',
 	    value: function getStore() {
 	      var storeName = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
-
+	
 	      if (!storeName) {
 	        return this.store.getState();
 	      } else {
 	        return this.store.getState()[storeName];
 	      }
 	    }
-
+	
 	    /* Dispatch an action or actionCreator thunk to the store to change store state */
-
+	
 	  }, {
 	    key: 'dispatch',
 	    value: function dispatch(action) {
 	      return this.store.dispatch(action);
 	    }
 	  }]);
-
+	
 	  return CyFramework;
 	}();
-
+	
 	/* Create a new CyFramework instance, passing in modules that need state initialization and
 	 * a configured default state. Can also accept small arity with default parameters.
 	 */
-
-
+	
+	
 	function config() {
 	  var modules = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
 	  var defaultState = arguments.length <= 1 || arguments[1] === undefined ? undefined : arguments[1];
-
+	
 	  return new CyFramework(modules, defaultState);
 	}
 
@@ -169,46 +169,46 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
-
+	
 	exports.__esModule = true;
 	exports.compose = exports.applyMiddleware = exports.bindActionCreators = exports.combineReducers = exports.createStore = undefined;
-
+	
 	var _createStore = __webpack_require__(5);
-
+	
 	var _createStore2 = _interopRequireDefault(_createStore);
-
+	
 	var _combineReducers = __webpack_require__(12);
-
+	
 	var _combineReducers2 = _interopRequireDefault(_combineReducers);
-
+	
 	var _bindActionCreators = __webpack_require__(14);
-
+	
 	var _bindActionCreators2 = _interopRequireDefault(_bindActionCreators);
-
+	
 	var _applyMiddleware = __webpack_require__(15);
-
+	
 	var _applyMiddleware2 = _interopRequireDefault(_applyMiddleware);
-
+	
 	var _compose = __webpack_require__(16);
-
+	
 	var _compose2 = _interopRequireDefault(_compose);
-
+	
 	var _warning = __webpack_require__(13);
-
+	
 	var _warning2 = _interopRequireDefault(_warning);
-
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
+	
 	/*
 	* This is a dummy function to check if the function name has been altered by minification.
 	* If the function has been minified and NODE_ENV !== 'production', warn the user.
 	*/
 	function isCrushed() {}
-
+	
 	if (process.env.NODE_ENV !== 'production' && typeof isCrushed.name === 'string' && isCrushed.name !== 'isCrushed') {
 	  (0, _warning2["default"])('You are currently using minified code outside of NODE_ENV === \'production\'. ' + 'This means that you are running a slower development build of Redux. ' + 'You can use loose-envify (https://github.com/zertosh/loose-envify) for browserify ' + 'or DefinePlugin for webpack (http://stackoverflow.com/questions/30030031) ' + 'to ensure you have the correct code for your production build.');
 	}
-
+	
 	exports.createStore = _createStore2["default"];
 	exports.combineReducers = _combineReducers2["default"];
 	exports.bindActionCreators = _bindActionCreators2["default"];
@@ -221,13 +221,13 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	// shim for using process in browser
-
+	
 	var process = module.exports = {};
 	var queue = [];
 	var draining = false;
 	var currentQueue;
 	var queueIndex = -1;
-
+	
 	function cleanUpNextTick() {
 	    if (!draining || !currentQueue) {
 	        return;
@@ -242,14 +242,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        drainQueue();
 	    }
 	}
-
+	
 	function drainQueue() {
 	    if (draining) {
 	        return;
 	    }
 	    var timeout = setTimeout(cleanUpNextTick);
 	    draining = true;
-
+	
 	    var len = queue.length;
 	    while(len) {
 	        currentQueue = queue;
@@ -266,7 +266,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    draining = false;
 	    clearTimeout(timeout);
 	}
-
+	
 	process.nextTick = function (fun) {
 	    var args = new Array(arguments.length - 1);
 	    if (arguments.length > 1) {
@@ -279,7 +279,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        setTimeout(drainQueue, 0);
 	    }
 	};
-
+	
 	// v8 likes predictible objects
 	function Item(fun, array) {
 	    this.fun = fun;
@@ -294,9 +294,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	process.argv = [];
 	process.version = ''; // empty string to avoid regexp issues
 	process.versions = {};
-
+	
 	function noop() {}
-
+	
 	process.on = noop;
 	process.addListener = noop;
 	process.once = noop;
@@ -304,11 +304,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	process.removeListener = noop;
 	process.removeAllListeners = noop;
 	process.emit = noop;
-
+	
 	process.binding = function (name) {
 	    throw new Error('process.binding is not supported');
 	};
-
+	
 	process.cwd = function () { return '/' };
 	process.chdir = function (dir) {
 	    throw new Error('process.chdir is not supported');
@@ -321,21 +321,21 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	exports.__esModule = true;
 	exports.ActionTypes = undefined;
 	exports["default"] = createStore;
-
+	
 	var _isPlainObject = __webpack_require__(6);
-
+	
 	var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
-
+	
 	var _symbolObservable = __webpack_require__(10);
-
+	
 	var _symbolObservable2 = _interopRequireDefault(_symbolObservable);
-
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
+	
 	/**
 	 * These are private action types reserved by Redux.
 	 * For any unknown actions, you must return the current state.
@@ -345,7 +345,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ActionTypes = exports.ActionTypes = {
 	  INIT: '@@redux/INIT'
 	};
-
+	
 	/**
 	 * Creates a Redux store that holds the state tree.
 	 * The only way to change the data in the store is to call `dispatch()` on it.
@@ -373,36 +373,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function createStore(reducer, initialState, enhancer) {
 	  var _ref2;
-
+	
 	  if (typeof initialState === 'function' && typeof enhancer === 'undefined') {
 	    enhancer = initialState;
 	    initialState = undefined;
 	  }
-
+	
 	  if (typeof enhancer !== 'undefined') {
 	    if (typeof enhancer !== 'function') {
 	      throw new Error('Expected the enhancer to be a function.');
 	    }
-
+	
 	    return enhancer(createStore)(reducer, initialState);
 	  }
-
+	
 	  if (typeof reducer !== 'function') {
 	    throw new Error('Expected the reducer to be a function.');
 	  }
-
+	
 	  var currentReducer = reducer;
 	  var currentState = initialState;
 	  var currentListeners = [];
 	  var nextListeners = currentListeners;
 	  var isDispatching = false;
-
+	
 	  function ensureCanMutateNextListeners() {
 	    if (nextListeners === currentListeners) {
 	      nextListeners = currentListeners.slice();
 	    }
 	  }
-
+	
 	  /**
 	   * Reads the state tree managed by the store.
 	   *
@@ -411,7 +411,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function getState() {
 	    return currentState;
 	  }
-
+	
 	  /**
 	   * Adds a change listener. It will be called any time an action is dispatched,
 	   * and some part of the state tree may potentially have changed. You may then
@@ -439,25 +439,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (typeof listener !== 'function') {
 	      throw new Error('Expected listener to be a function.');
 	    }
-
+	
 	    var isSubscribed = true;
-
+	
 	    ensureCanMutateNextListeners();
 	    nextListeners.push(listener);
-
+	
 	    return function unsubscribe() {
 	      if (!isSubscribed) {
 	        return;
 	      }
-
+	
 	      isSubscribed = false;
-
+	
 	      ensureCanMutateNextListeners();
 	      var index = nextListeners.indexOf(listener);
 	      nextListeners.splice(index, 1);
 	    };
 	  }
-
+	
 	  /**
 	   * Dispatches an action. It is the only way to trigger a state change.
 	   *
@@ -487,30 +487,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!(0, _isPlainObject2["default"])(action)) {
 	      throw new Error('Actions must be plain objects. ' + 'Use custom middleware for async actions.');
 	    }
-
+	
 	    if (typeof action.type === 'undefined') {
 	      throw new Error('Actions may not have an undefined "type" property. ' + 'Have you misspelled a constant?');
 	    }
-
+	
 	    if (isDispatching) {
 	      throw new Error('Reducers may not dispatch actions.');
 	    }
-
+	
 	    try {
 	      isDispatching = true;
 	      currentState = currentReducer(currentState, action);
 	    } finally {
 	      isDispatching = false;
 	    }
-
+	
 	    var listeners = currentListeners = nextListeners;
 	    for (var i = 0; i < listeners.length; i++) {
 	      listeners[i]();
 	    }
-
+	
 	    return action;
 	  }
-
+	
 	  /**
 	   * Replaces the reducer currently used by the store to calculate the state.
 	   *
@@ -525,11 +525,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (typeof nextReducer !== 'function') {
 	      throw new Error('Expected the nextReducer to be a function.');
 	    }
-
+	
 	    currentReducer = nextReducer;
 	    dispatch({ type: ActionTypes.INIT });
 	  }
-
+	
 	  /**
 	   * Interoperability point for observable/reactive libraries.
 	   * @returns {observable} A minimal observable of state changes.
@@ -538,7 +538,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  function observable() {
 	    var _ref;
-
+	
 	    var outerSubscribe = subscribe;
 	    return _ref = {
 	      /**
@@ -549,18 +549,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	       * be used to unsubscribe the observable from the store, and prevent further
 	       * emission of values from the observable.
 	       */
-
+	
 	      subscribe: function subscribe(observer) {
 	        if (typeof observer !== 'object') {
 	          throw new TypeError('Expected the observer to be an object.');
 	        }
-
+	
 	        function observeState() {
 	          if (observer.next) {
 	            observer.next(getState());
 	          }
 	        }
-
+	
 	        observeState();
 	        var unsubscribe = outerSubscribe(observeState);
 	        return { unsubscribe: unsubscribe };
@@ -569,12 +569,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return this;
 	    }, _ref;
 	  }
-
+	
 	  // When a store is created, an "INIT" action is dispatched so that every
 	  // reducer returns their initial state. This effectively populates
 	  // the initial state tree.
 	  dispatch({ type: ActionTypes.INIT });
-
+	
 	  return _ref2 = {
 	    dispatch: dispatch,
 	    subscribe: subscribe,
@@ -590,29 +590,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	var getPrototype = __webpack_require__(7),
 	    isHostObject = __webpack_require__(8),
 	    isObjectLike = __webpack_require__(9);
-
+	
 	/** `Object#toString` result references. */
 	var objectTag = '[object Object]';
-
+	
 	/** Used for built-in method references. */
 	var objectProto = Object.prototype;
-
+	
 	/** Used to resolve the decompiled source of functions. */
 	var funcToString = Function.prototype.toString;
-
+	
 	/** Used to check objects for own properties. */
 	var hasOwnProperty = objectProto.hasOwnProperty;
-
+	
 	/** Used to infer the `Object` constructor. */
 	var objectCtorString = funcToString.call(Object);
-
+	
 	/**
 	 * Used to resolve the
 	 * [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
 	 * of values.
 	 */
 	var objectToString = objectProto.toString;
-
+	
 	/**
 	 * Checks if `value` is a plain object, that is, an object created by the
 	 * `Object` constructor or one with a `[[Prototype]]` of `null`.
@@ -655,7 +655,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return (typeof Ctor == 'function' &&
 	    Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString);
 	}
-
+	
 	module.exports = isPlainObject;
 
 
@@ -665,7 +665,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
 	var nativeGetPrototype = Object.getPrototypeOf;
-
+	
 	/**
 	 * Gets the `[[Prototype]]` of `value`.
 	 *
@@ -676,7 +676,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function getPrototype(value) {
 	  return nativeGetPrototype(Object(value));
 	}
-
+	
 	module.exports = getPrototype;
 
 
@@ -702,7 +702,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return result;
 	}
-
+	
 	module.exports = isHostObject;
 
 
@@ -737,7 +737,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function isObjectLike(value) {
 	  return !!value && typeof value == 'object';
 	}
-
+	
 	module.exports = isObjectLike;
 
 
@@ -747,9 +747,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* WEBPACK VAR INJECTION */(function(global) {/* global window */
 	'use strict';
-
+	
 	module.exports = __webpack_require__(11)(global || window || this);
-
+	
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
@@ -757,11 +757,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	'use strict';
-
+	
 	module.exports = function symbolObservablePonyfill(root) {
 		var result;
 		var Symbol = root.Symbol;
-
+	
 		if (typeof Symbol === 'function') {
 			if (Symbol.observable) {
 				result = Symbol.observable;
@@ -772,7 +772,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		} else {
 			result = '@@observable';
 		}
-
+	
 		return result;
 	};
 
@@ -782,66 +782,66 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
-
+	
 	exports.__esModule = true;
 	exports["default"] = combineReducers;
-
+	
 	var _createStore = __webpack_require__(5);
-
+	
 	var _isPlainObject = __webpack_require__(6);
-
+	
 	var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
-
+	
 	var _warning = __webpack_require__(13);
-
+	
 	var _warning2 = _interopRequireDefault(_warning);
-
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
+	
 	function getUndefinedStateErrorMessage(key, action) {
 	  var actionType = action && action.type;
 	  var actionName = actionType && '"' + actionType.toString() + '"' || 'an action';
-
+	
 	  return 'Given action ' + actionName + ', reducer "' + key + '" returned undefined. ' + 'To ignore an action, you must explicitly return the previous state.';
 	}
-
+	
 	function getUnexpectedStateShapeWarningMessage(inputState, reducers, action) {
 	  var reducerKeys = Object.keys(reducers);
 	  var argumentName = action && action.type === _createStore.ActionTypes.INIT ? 'initialState argument passed to createStore' : 'previous state received by the reducer';
-
+	
 	  if (reducerKeys.length === 0) {
 	    return 'Store does not have a valid reducer. Make sure the argument passed ' + 'to combineReducers is an object whose values are reducers.';
 	  }
-
+	
 	  if (!(0, _isPlainObject2["default"])(inputState)) {
 	    return 'The ' + argumentName + ' has unexpected type of "' + {}.toString.call(inputState).match(/\s([a-z|A-Z]+)/)[1] + '". Expected argument to be an object with the following ' + ('keys: "' + reducerKeys.join('", "') + '"');
 	  }
-
+	
 	  var unexpectedKeys = Object.keys(inputState).filter(function (key) {
 	    return !reducers.hasOwnProperty(key);
 	  });
-
+	
 	  if (unexpectedKeys.length > 0) {
 	    return 'Unexpected ' + (unexpectedKeys.length > 1 ? 'keys' : 'key') + ' ' + ('"' + unexpectedKeys.join('", "') + '" found in ' + argumentName + '. ') + 'Expected to find one of the known reducer keys instead: ' + ('"' + reducerKeys.join('", "') + '". Unexpected keys will be ignored.');
 	  }
 	}
-
+	
 	function assertReducerSanity(reducers) {
 	  Object.keys(reducers).forEach(function (key) {
 	    var reducer = reducers[key];
 	    var initialState = reducer(undefined, { type: _createStore.ActionTypes.INIT });
-
+	
 	    if (typeof initialState === 'undefined') {
 	      throw new Error('Reducer "' + key + '" returned undefined during initialization. ' + 'If the state passed to the reducer is undefined, you must ' + 'explicitly return the initial state. The initial state may ' + 'not be undefined.');
 	    }
-
+	
 	    var type = '@@redux/PROBE_UNKNOWN_ACTION_' + Math.random().toString(36).substring(7).split('').join('.');
 	    if (typeof reducer(undefined, { type: type }) === 'undefined') {
 	      throw new Error('Reducer "' + key + '" returned undefined when probed with a random type. ' + ('Don\'t try to handle ' + _createStore.ActionTypes.INIT + ' or other actions in "redux/*" ') + 'namespace. They are considered private. Instead, you must return the ' + 'current state for any unknown actions, unless it is undefined, ' + 'in which case you must return the initial state, regardless of the ' + 'action type. The initial state may not be undefined.');
 	    }
 	  });
 	}
-
+	
 	/**
 	 * Turns an object whose values are different reducer functions, into a single
 	 * reducer function. It will call every child reducer, and gather their results
@@ -868,29 +868,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  var finalReducerKeys = Object.keys(finalReducers);
-
+	
 	  var sanityError;
 	  try {
 	    assertReducerSanity(finalReducers);
 	  } catch (e) {
 	    sanityError = e;
 	  }
-
+	
 	  return function combination() {
 	    var state = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	    var action = arguments[1];
-
+	
 	    if (sanityError) {
 	      throw sanityError;
 	    }
-
+	
 	    if (process.env.NODE_ENV !== 'production') {
 	      var warningMessage = getUnexpectedStateShapeWarningMessage(state, finalReducers, action);
 	      if (warningMessage) {
 	        (0, _warning2["default"])(warningMessage);
 	      }
 	    }
-
+	
 	    var hasChanged = false;
 	    var nextState = {};
 	    for (var i = 0; i < finalReducerKeys.length; i++) {
@@ -915,7 +915,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	'use strict';
-
+	
 	exports.__esModule = true;
 	exports["default"] = warning;
 	/**
@@ -945,7 +945,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	'use strict';
-
+	
 	exports.__esModule = true;
 	exports["default"] = bindActionCreators;
 	function bindActionCreator(actionCreator, dispatch) {
@@ -953,7 +953,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return dispatch(actionCreator.apply(undefined, arguments));
 	  };
 	}
-
+	
 	/**
 	 * Turns an object whose values are action creators, into an object with the
 	 * same keys, but with every function wrapped into a `dispatch` call so they
@@ -979,11 +979,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (typeof actionCreators === 'function') {
 	    return bindActionCreator(actionCreators, dispatch);
 	  }
-
+	
 	  if (typeof actionCreators !== 'object' || actionCreators === null) {
 	    throw new Error('bindActionCreators expected an object or a function, instead received ' + (actionCreators === null ? 'null' : typeof actionCreators) + '. ' + 'Did you write "import ActionCreators from" instead of "import * as ActionCreators from"?');
 	  }
-
+	
 	  var keys = Object.keys(actionCreators);
 	  var boundActionCreators = {};
 	  for (var i = 0; i < keys.length; i++) {
@@ -1001,19 +1001,19 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	exports.__esModule = true;
-
+	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
+	
 	exports["default"] = applyMiddleware;
-
+	
 	var _compose = __webpack_require__(16);
-
+	
 	var _compose2 = _interopRequireDefault(_compose);
-
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
+	
 	/**
 	 * Creates a store enhancer that applies middleware to the dispatch method
 	 * of the Redux store. This is handy for a variety of tasks, such as expressing
@@ -1034,13 +1034,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  for (var _len = arguments.length, middlewares = Array(_len), _key = 0; _key < _len; _key++) {
 	    middlewares[_key] = arguments[_key];
 	  }
-
+	
 	  return function (createStore) {
 	    return function (reducer, initialState, enhancer) {
 	      var store = createStore(reducer, initialState, enhancer);
 	      var _dispatch = store.dispatch;
 	      var chain = [];
-
+	
 	      var middlewareAPI = {
 	        getState: store.getState,
 	        dispatch: function dispatch(action) {
@@ -1051,7 +1051,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return middleware(middlewareAPI);
 	      });
 	      _dispatch = _compose2["default"].apply(undefined, chain)(store.dispatch);
-
+	
 	      return _extends({}, store, {
 	        dispatch: _dispatch
 	      });
@@ -1064,7 +1064,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	"use strict";
-
+	
 	exports.__esModule = true;
 	exports["default"] = compose;
 	/**
@@ -1077,12 +1077,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * from right to left. For example, compose(f, g, h) is identical to doing
 	 * (...args) => f(g(h(...args))).
 	 */
-
+	
 	function compose() {
 	  for (var _len = arguments.length, funcs = Array(_len), _key = 0; _key < _len; _key++) {
 	    funcs[_key] = arguments[_key];
 	  }
-
+	
 	  if (funcs.length === 0) {
 	    return function (arg) {
 	      return arg;
@@ -1099,7 +1099,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      };
 	    }();
-
+	
 	    if (typeof _ret === "object") return _ret.v;
 	  }
 	}
@@ -1109,20 +1109,20 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	exports.__esModule = true;
 	exports.connect = exports.Provider = undefined;
-
+	
 	var _Provider = __webpack_require__(18);
-
+	
 	var _Provider2 = _interopRequireDefault(_Provider);
-
+	
 	var _connect = __webpack_require__(21);
-
+	
 	var _connect2 = _interopRequireDefault(_connect);
-
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
+	
 	exports.Provider = _Provider2["default"];
 	exports.connect = _connect2["default"];
 
@@ -1131,76 +1131,76 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
-
+	
 	exports.__esModule = true;
 	exports["default"] = undefined;
-
+	
 	var _react = __webpack_require__(1);
-
+	
 	var _storeShape = __webpack_require__(19);
-
+	
 	var _storeShape2 = _interopRequireDefault(_storeShape);
-
+	
 	var _warning = __webpack_require__(20);
-
+	
 	var _warning2 = _interopRequireDefault(_warning);
-
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
+	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
+	
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
+	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
+	
 	var didWarnAboutReceivingStore = false;
 	function warnAboutReceivingStore() {
 	  if (didWarnAboutReceivingStore) {
 	    return;
 	  }
 	  didWarnAboutReceivingStore = true;
-
+	
 	  (0, _warning2["default"])('<Provider> does not support changing `store` on the fly. ' + 'It is most likely that you see this error because you updated to ' + 'Redux 2.x and React Redux 2.x which no longer hot reload reducers ' + 'automatically. See https://github.com/reactjs/react-redux/releases/' + 'tag/v2.0.0 for the migration instructions.');
 	}
-
+	
 	var Provider = function (_Component) {
 	  _inherits(Provider, _Component);
-
+	
 	  Provider.prototype.getChildContext = function getChildContext() {
 	    return { store: this.store };
 	  };
-
+	
 	  function Provider(props, context) {
 	    _classCallCheck(this, Provider);
-
+	
 	    var _this = _possibleConstructorReturn(this, _Component.call(this, props, context));
-
+	
 	    _this.store = props.store;
 	    return _this;
 	  }
-
+	
 	  Provider.prototype.render = function render() {
 	    var children = this.props.children;
-
+	
 	    return _react.Children.only(children);
 	  };
-
+	
 	  return Provider;
 	}(_react.Component);
-
+	
 	exports["default"] = Provider;
-
+	
 	if (process.env.NODE_ENV !== 'production') {
 	  Provider.prototype.componentWillReceiveProps = function (nextProps) {
 	    var store = this.store;
 	    var nextStore = nextProps.store;
-
+	
 	    if (store !== nextStore) {
 	      warnAboutReceivingStore();
 	    }
 	  };
 	}
-
+	
 	Provider.propTypes = {
 	  store: _storeShape2["default"].isRequired,
 	  children: _react.PropTypes.element.isRequired
@@ -1215,11 +1215,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	exports.__esModule = true;
-
+	
 	var _react = __webpack_require__(1);
-
+	
 	exports["default"] = _react.PropTypes.shape({
 	  subscribe: _react.PropTypes.func.isRequired,
 	  dispatch: _react.PropTypes.func.isRequired,
@@ -1231,7 +1231,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	'use strict';
-
+	
 	exports.__esModule = true;
 	exports["default"] = warning;
 	/**
@@ -1260,50 +1260,50 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
-
+	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
+	
 	exports.__esModule = true;
 	exports["default"] = connect;
-
+	
 	var _react = __webpack_require__(1);
-
+	
 	var _storeShape = __webpack_require__(19);
-
+	
 	var _storeShape2 = _interopRequireDefault(_storeShape);
-
+	
 	var _shallowEqual = __webpack_require__(22);
-
+	
 	var _shallowEqual2 = _interopRequireDefault(_shallowEqual);
-
+	
 	var _wrapActionCreators = __webpack_require__(23);
-
+	
 	var _wrapActionCreators2 = _interopRequireDefault(_wrapActionCreators);
-
+	
 	var _warning = __webpack_require__(20);
-
+	
 	var _warning2 = _interopRequireDefault(_warning);
-
+	
 	var _isPlainObject = __webpack_require__(6);
-
+	
 	var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
-
+	
 	var _hoistNonReactStatics = __webpack_require__(24);
-
+	
 	var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
-
+	
 	var _invariant = __webpack_require__(25);
-
+	
 	var _invariant2 = _interopRequireDefault(_invariant);
-
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
+	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
+	
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
+	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
+	
 	var defaultMapStateToProps = function defaultMapStateToProps(state) {
 	  return {};
 	}; // eslint-disable-line no-unused-vars
@@ -1313,11 +1313,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var defaultMergeProps = function defaultMergeProps(stateProps, dispatchProps, parentProps) {
 	  return _extends({}, parentProps, stateProps, dispatchProps);
 	};
-
+	
 	function getDisplayName(WrappedComponent) {
 	  return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 	}
-
+	
 	var errorObject = { value: null };
 	function tryCatch(fn, ctx) {
 	  try {
@@ -1327,16 +1327,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return errorObject;
 	  }
 	}
-
+	
 	// Helps track hot reloading.
 	var nextVersion = 0;
-
+	
 	function connect(mapStateToProps, mapDispatchToProps, mergeProps) {
 	  var options = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
-
+	
 	  var shouldSubscribe = Boolean(mapStateToProps);
 	  var mapState = mapStateToProps || defaultMapStateToProps;
-
+	
 	  var mapDispatch = undefined;
 	  if (typeof mapDispatchToProps === 'function') {
 	    mapDispatch = mapDispatchToProps;
@@ -1345,27 +1345,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else {
 	    mapDispatch = (0, _wrapActionCreators2["default"])(mapDispatchToProps);
 	  }
-
+	
 	  var finalMergeProps = mergeProps || defaultMergeProps;
 	  var _options$pure = options.pure;
 	  var pure = _options$pure === undefined ? true : _options$pure;
 	  var _options$withRef = options.withRef;
 	  var withRef = _options$withRef === undefined ? false : _options$withRef;
-
+	
 	  var checkMergedEquals = pure && finalMergeProps !== defaultMergeProps;
-
+	
 	  // Helps track hot reloading.
 	  var version = nextVersion++;
-
+	
 	  return function wrapWithConnect(WrappedComponent) {
 	    var connectDisplayName = 'Connect(' + getDisplayName(WrappedComponent) + ')';
-
+	
 	    function checkStateShape(props, methodName) {
 	      if (!(0, _isPlainObject2["default"])(props)) {
 	        (0, _warning2["default"])(methodName + '() in ' + connectDisplayName + ' must return a plain object. ' + ('Instead received ' + props + '.'));
 	      }
 	    }
-
+	
 	    function computeMergedProps(stateProps, dispatchProps, parentProps) {
 	      var mergedProps = finalMergeProps(stateProps, dispatchProps, parentProps);
 	      if (process.env.NODE_ENV !== 'production') {
@@ -1373,156 +1373,156 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      return mergedProps;
 	    }
-
+	
 	    var Connect = function (_Component) {
 	      _inherits(Connect, _Component);
-
+	
 	      Connect.prototype.shouldComponentUpdate = function shouldComponentUpdate() {
 	        return !pure || this.haveOwnPropsChanged || this.hasStoreStateChanged;
 	      };
-
+	
 	      function Connect(props, context) {
 	        _classCallCheck(this, Connect);
-
+	
 	        var _this = _possibleConstructorReturn(this, _Component.call(this, props, context));
-
+	
 	        _this.version = version;
 	        _this.store = props.store || context.store;
-
+	
 	        (0, _invariant2["default"])(_this.store, 'Could not find "store" in either the context or ' + ('props of "' + connectDisplayName + '". ') + 'Either wrap the root component in a <Provider>, ' + ('or explicitly pass "store" as a prop to "' + connectDisplayName + '".'));
-
+	
 	        var storeState = _this.store.getState();
 	        _this.state = { storeState: storeState };
 	        _this.clearCache();
 	        return _this;
 	      }
-
+	
 	      Connect.prototype.computeStateProps = function computeStateProps(store, props) {
 	        if (!this.finalMapStateToProps) {
 	          return this.configureFinalMapState(store, props);
 	        }
-
+	
 	        var state = store.getState();
 	        var stateProps = this.doStatePropsDependOnOwnProps ? this.finalMapStateToProps(state, props) : this.finalMapStateToProps(state);
-
+	
 	        if (process.env.NODE_ENV !== 'production') {
 	          checkStateShape(stateProps, 'mapStateToProps');
 	        }
 	        return stateProps;
 	      };
-
+	
 	      Connect.prototype.configureFinalMapState = function configureFinalMapState(store, props) {
 	        var mappedState = mapState(store.getState(), props);
 	        var isFactory = typeof mappedState === 'function';
-
+	
 	        this.finalMapStateToProps = isFactory ? mappedState : mapState;
 	        this.doStatePropsDependOnOwnProps = this.finalMapStateToProps.length !== 1;
-
+	
 	        if (isFactory) {
 	          return this.computeStateProps(store, props);
 	        }
-
+	
 	        if (process.env.NODE_ENV !== 'production') {
 	          checkStateShape(mappedState, 'mapStateToProps');
 	        }
 	        return mappedState;
 	      };
-
+	
 	      Connect.prototype.computeDispatchProps = function computeDispatchProps(store, props) {
 	        if (!this.finalMapDispatchToProps) {
 	          return this.configureFinalMapDispatch(store, props);
 	        }
-
+	
 	        var dispatch = store.dispatch;
-
+	
 	        var dispatchProps = this.doDispatchPropsDependOnOwnProps ? this.finalMapDispatchToProps(dispatch, props) : this.finalMapDispatchToProps(dispatch);
-
+	
 	        if (process.env.NODE_ENV !== 'production') {
 	          checkStateShape(dispatchProps, 'mapDispatchToProps');
 	        }
 	        return dispatchProps;
 	      };
-
+	
 	      Connect.prototype.configureFinalMapDispatch = function configureFinalMapDispatch(store, props) {
 	        var mappedDispatch = mapDispatch(store.dispatch, props);
 	        var isFactory = typeof mappedDispatch === 'function';
-
+	
 	        this.finalMapDispatchToProps = isFactory ? mappedDispatch : mapDispatch;
 	        this.doDispatchPropsDependOnOwnProps = this.finalMapDispatchToProps.length !== 1;
-
+	
 	        if (isFactory) {
 	          return this.computeDispatchProps(store, props);
 	        }
-
+	
 	        if (process.env.NODE_ENV !== 'production') {
 	          checkStateShape(mappedDispatch, 'mapDispatchToProps');
 	        }
 	        return mappedDispatch;
 	      };
-
+	
 	      Connect.prototype.updateStatePropsIfNeeded = function updateStatePropsIfNeeded() {
 	        var nextStateProps = this.computeStateProps(this.store, this.props);
 	        if (this.stateProps && (0, _shallowEqual2["default"])(nextStateProps, this.stateProps)) {
 	          return false;
 	        }
-
+	
 	        this.stateProps = nextStateProps;
 	        return true;
 	      };
-
+	
 	      Connect.prototype.updateDispatchPropsIfNeeded = function updateDispatchPropsIfNeeded() {
 	        var nextDispatchProps = this.computeDispatchProps(this.store, this.props);
 	        if (this.dispatchProps && (0, _shallowEqual2["default"])(nextDispatchProps, this.dispatchProps)) {
 	          return false;
 	        }
-
+	
 	        this.dispatchProps = nextDispatchProps;
 	        return true;
 	      };
-
+	
 	      Connect.prototype.updateMergedPropsIfNeeded = function updateMergedPropsIfNeeded() {
 	        var nextMergedProps = computeMergedProps(this.stateProps, this.dispatchProps, this.props);
 	        if (this.mergedProps && checkMergedEquals && (0, _shallowEqual2["default"])(nextMergedProps, this.mergedProps)) {
 	          return false;
 	        }
-
+	
 	        this.mergedProps = nextMergedProps;
 	        return true;
 	      };
-
+	
 	      Connect.prototype.isSubscribed = function isSubscribed() {
 	        return typeof this.unsubscribe === 'function';
 	      };
-
+	
 	      Connect.prototype.trySubscribe = function trySubscribe() {
 	        if (shouldSubscribe && !this.unsubscribe) {
 	          this.unsubscribe = this.store.subscribe(this.handleChange.bind(this));
 	          this.handleChange();
 	        }
 	      };
-
+	
 	      Connect.prototype.tryUnsubscribe = function tryUnsubscribe() {
 	        if (this.unsubscribe) {
 	          this.unsubscribe();
 	          this.unsubscribe = null;
 	        }
 	      };
-
+	
 	      Connect.prototype.componentDidMount = function componentDidMount() {
 	        this.trySubscribe();
 	      };
-
+	
 	      Connect.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps) {
 	        if (!pure || !(0, _shallowEqual2["default"])(nextProps, this.props)) {
 	          this.haveOwnPropsChanged = true;
 	        }
 	      };
-
+	
 	      Connect.prototype.componentWillUnmount = function componentWillUnmount() {
 	        this.tryUnsubscribe();
 	        this.clearCache();
 	      };
-
+	
 	      Connect.prototype.clearCache = function clearCache() {
 	        this.dispatchProps = null;
 	        this.stateProps = null;
@@ -1535,18 +1535,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.finalMapDispatchToProps = null;
 	        this.finalMapStateToProps = null;
 	      };
-
+	
 	      Connect.prototype.handleChange = function handleChange() {
 	        if (!this.unsubscribe) {
 	          return;
 	        }
-
+	
 	        var storeState = this.store.getState();
 	        var prevStoreState = this.state.storeState;
 	        if (pure && prevStoreState === storeState) {
 	          return;
 	        }
-
+	
 	        if (pure && !this.doStatePropsDependOnOwnProps) {
 	          var haveStatePropsChanged = tryCatch(this.updateStatePropsIfNeeded, this);
 	          if (!haveStatePropsChanged) {
@@ -1557,40 +1557,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	          this.haveStatePropsBeenPrecalculated = true;
 	        }
-
+	
 	        this.hasStoreStateChanged = true;
 	        this.setState({ storeState: storeState });
 	      };
-
+	
 	      Connect.prototype.getWrappedInstance = function getWrappedInstance() {
 	        (0, _invariant2["default"])(withRef, 'To access the wrapped instance, you need to specify ' + '{ withRef: true } as the fourth argument of the connect() call.');
-
+	
 	        return this.refs.wrappedInstance;
 	      };
-
+	
 	      Connect.prototype.render = function render() {
 	        var haveOwnPropsChanged = this.haveOwnPropsChanged;
 	        var hasStoreStateChanged = this.hasStoreStateChanged;
 	        var haveStatePropsBeenPrecalculated = this.haveStatePropsBeenPrecalculated;
 	        var statePropsPrecalculationError = this.statePropsPrecalculationError;
 	        var renderedElement = this.renderedElement;
-
+	
 	        this.haveOwnPropsChanged = false;
 	        this.hasStoreStateChanged = false;
 	        this.haveStatePropsBeenPrecalculated = false;
 	        this.statePropsPrecalculationError = null;
-
+	
 	        if (statePropsPrecalculationError) {
 	          throw statePropsPrecalculationError;
 	        }
-
+	
 	        var shouldUpdateStateProps = true;
 	        var shouldUpdateDispatchProps = true;
 	        if (pure && renderedElement) {
 	          shouldUpdateStateProps = hasStoreStateChanged || haveOwnPropsChanged && this.doStatePropsDependOnOwnProps;
 	          shouldUpdateDispatchProps = haveOwnPropsChanged && this.doDispatchPropsDependOnOwnProps;
 	        }
-
+	
 	        var haveStatePropsChanged = false;
 	        var haveDispatchPropsChanged = false;
 	        if (haveStatePropsBeenPrecalculated) {
@@ -1601,18 +1601,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (shouldUpdateDispatchProps) {
 	          haveDispatchPropsChanged = this.updateDispatchPropsIfNeeded();
 	        }
-
+	
 	        var haveMergedPropsChanged = true;
 	        if (haveStatePropsChanged || haveDispatchPropsChanged || haveOwnPropsChanged) {
 	          haveMergedPropsChanged = this.updateMergedPropsIfNeeded();
 	        } else {
 	          haveMergedPropsChanged = false;
 	        }
-
+	
 	        if (!haveMergedPropsChanged && renderedElement) {
 	          return renderedElement;
 	        }
-
+	
 	        if (withRef) {
 	          this.renderedElement = (0, _react.createElement)(WrappedComponent, _extends({}, this.mergedProps, {
 	            ref: 'wrappedInstance'
@@ -1620,13 +1620,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	          this.renderedElement = (0, _react.createElement)(WrappedComponent, this.mergedProps);
 	        }
-
+	
 	        return this.renderedElement;
 	      };
-
+	
 	      return Connect;
 	    }(_react.Component);
-
+	
 	    Connect.displayName = connectDisplayName;
 	    Connect.WrappedComponent = WrappedComponent;
 	    Connect.contextTypes = {
@@ -1635,20 +1635,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Connect.propTypes = {
 	      store: _storeShape2["default"]
 	    };
-
+	
 	    if (process.env.NODE_ENV !== 'production') {
 	      Connect.prototype.componentWillUpdate = function componentWillUpdate() {
 	        if (this.version === version) {
 	          return;
 	        }
-
+	
 	        // We are hot reloading!
 	        this.version = version;
 	        this.trySubscribe();
 	        this.clearCache();
 	      };
 	    }
-
+	
 	    return (0, _hoistNonReactStatics2["default"])(Connect, WrappedComponent);
 	  };
 	}
@@ -1659,21 +1659,21 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	"use strict";
-
+	
 	exports.__esModule = true;
 	exports["default"] = shallowEqual;
 	function shallowEqual(objA, objB) {
 	  if (objA === objB) {
 	    return true;
 	  }
-
+	
 	  var keysA = Object.keys(objA);
 	  var keysB = Object.keys(objB);
-
+	
 	  if (keysA.length !== keysB.length) {
 	    return false;
 	  }
-
+	
 	  // Test for A's keys different from B.
 	  var hasOwn = Object.prototype.hasOwnProperty;
 	  for (var i = 0; i < keysA.length; i++) {
@@ -1681,7 +1681,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return false;
 	    }
 	  }
-
+	
 	  return true;
 	}
 
@@ -1690,12 +1690,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	exports.__esModule = true;
 	exports["default"] = wrapActionCreators;
-
+	
 	var _redux = __webpack_require__(3);
-
+	
 	function wrapActionCreators(actionCreators) {
 	  return function (dispatch) {
 	    return (0, _redux.bindActionCreators)(actionCreators, dispatch);
@@ -1711,7 +1711,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Copyrights licensed under the New BSD License. See the accompanying LICENSE file for terms.
 	 */
 	'use strict';
-
+	
 	var REACT_STATICS = {
 	    childContextTypes: true,
 	    contextTypes: true,
@@ -1722,7 +1722,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    propTypes: true,
 	    type: true
 	};
-
+	
 	var KNOWN_STATICS = {
 	    name: true,
 	    length: true,
@@ -1731,7 +1731,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    arguments: true,
 	    arity: true
 	};
-
+	
 	module.exports = function hoistNonReactStatics(targetComponent, sourceComponent) {
 	    if (typeof sourceComponent !== 'string') { // don't hoist over string (html) components
 	        var keys = Object.getOwnPropertyNames(sourceComponent);
@@ -1740,12 +1740,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                try {
 	                    targetComponent[keys[i]] = sourceComponent[keys[i]];
 	                } catch (error) {
-
+	
 	                }
 	            }
 	        }
 	    }
-
+	
 	    return targetComponent;
 	};
 
@@ -1762,9 +1762,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * LICENSE file in the root directory of this source tree. An additional grant
 	 * of patent rights can be found in the PATENTS file in the same directory.
 	 */
-
+	
 	'use strict';
-
+	
 	/**
 	 * Use invariant() to assert state which your program assumes to be true.
 	 *
@@ -1775,14 +1775,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * The invariant message will be stripped in production, but the invariant
 	 * will remain to ensure logic does not differ in production.
 	 */
-
+	
 	var invariant = function(condition, format, a, b, c, d, e, f) {
 	  if (process.env.NODE_ENV !== 'production') {
 	    if (format === undefined) {
 	      throw new Error('invariant requires an error message argument');
 	    }
 	  }
-
+	
 	  if (!condition) {
 	    var error;
 	    if (format === undefined) {
@@ -1798,14 +1798,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      );
 	      error.name = 'Invariant Violation';
 	    }
-
+	
 	    error.framesToPop = 1; // we don't care about invariant's own frame
 	    throw error;
 	  }
 	};
-
+	
 	module.exports = invariant;
-
+	
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
@@ -1813,31 +1813,31 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
 	exports.default = configureStore;
-
+	
 	var _redux = __webpack_require__(3);
-
+	
 	var _reduxThunk = __webpack_require__(27);
-
+	
 	var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
-
+	
 	var _reduxLogger = __webpack_require__(28);
-
+	
 	var _reduxLogger2 = _interopRequireDefault(_reduxLogger);
-
+	
 	var _empty = __webpack_require__(29);
-
+	
 	var _empty2 = _interopRequireDefault(_empty);
-
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
+	
 	/* Create a new logger middleware */
 	var logger = (0, _reduxLogger2.default)();
-
+	
 	/* Add the thunk middleware for async api calls, logger for legging, and
 	 * enable devtools for browsing the redux store using a browser plugin.
 	 * Returns a createStore function.
@@ -1845,14 +1845,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	var finalCreateStore = (0, _redux.compose)((0, _redux.applyMiddleware)(_reduxThunk2.default, logger), window.devToolsExtension ? window.devToolsExtension() : function (f) {
 	  return f;
 	})(_redux.createStore);
-
+	
 	/* Creates the store by combinding all the subStores into one store, and using initialstate
 	 * if it was defined.
 	 */
 	function configureStore() {
 	  var reducers = arguments.length <= 0 || arguments[0] === undefined ? { empty: _empty2.default } : arguments[0];
 	  var initialstate = arguments.length <= 1 || arguments[1] === undefined ? undefined : arguments[1];
-
+	
 	  var store = finalCreateStore((0, _redux.combineReducers)(reducers), initialstate);
 	  return store;
 	}
@@ -1862,18 +1862,18 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	'use strict';
-
+	
 	function thunkMiddleware(_ref) {
 	  var dispatch = _ref.dispatch;
 	  var getState = _ref.getState;
-
+	
 	  return function (next) {
 	    return function (action) {
 	      return typeof action === 'function' ? action(dispatch, getState) : next(action);
 	    };
 	  };
 	}
-
+	
 	module.exports = thunkMiddleware;
 
 /***/ },
@@ -1881,11 +1881,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	"use strict";
-
+	
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
+	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
-
+	
 	var repeat = function repeat(str, times) {
 	  return new Array(times + 1).join(str);
 	};
@@ -1895,10 +1895,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var formatTime = function formatTime(time) {
 	  return "@ " + pad(time.getHours(), 2) + ":" + pad(time.getMinutes(), 2) + ":" + pad(time.getSeconds(), 2) + "." + pad(time.getMilliseconds(), 3);
 	};
-
+	
 	// Use the new performance api to get better precision if available
 	var timer = typeof performance !== "undefined" && typeof performance.now === "function" ? performance : Date;
-
+	
 	/**
 	 * parse the level option of createLogger
 	 *
@@ -1907,7 +1907,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @property {array} payload
 	 * @property {string} type
 	 */
-
+	
 	function getLogLevel(level, action, payload, type) {
 	  switch (typeof level === "undefined" ? "undefined" : _typeof(level)) {
 	    case "object":
@@ -1918,7 +1918,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return level;
 	  }
 	}
-
+	
 	/**
 	 * Creates logger with followed options
 	 *
@@ -1936,7 +1936,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @property {function} options.actionTransformer - transform action before print
 	 * @property {function} options.errorTransformer - transform error before print
 	 */
-
+	
 	function createLogger() {
 	  var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	  var _options$level = options.level;
@@ -1983,9 +1983,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return "#F20404";
 	    }
 	  } : _options$colors;
-
+	
 	  // exit if console undefined
-
+	
 	  if (typeof logger === "undefined") {
 	    return function () {
 	      return function (next) {
@@ -1995,11 +1995,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	    };
 	  }
-
+	
 	  if (transformer) {
 	    console.error("Option 'transformer' is deprecated, use stateTransformer instead");
 	  }
-
+	
 	  var logBuffer = [];
 	  function printBuffer() {
 	    logBuffer.forEach(function (logEntry, key) {
@@ -2010,7 +2010,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var error = logEntry.error;
 	      var took = logEntry.took;
 	      var nextState = logEntry.nextState;
-
+	
 	      var nextEntry = logBuffer[key + 1];
 	      if (nextEntry) {
 	        nextState = nextEntry.prevState;
@@ -2021,11 +2021,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var isCollapsed = typeof collapsed === "function" ? collapsed(function () {
 	        return nextState;
 	      }, action) : collapsed;
-
+	
 	      var formattedTime = formatTime(startedTime);
 	      var titleCSS = colors.title ? "color: " + colors.title(formattedAction) + ";" : null;
 	      var title = "action " + (timestamp ? formattedTime : "") + " " + formattedAction.type + " " + (duration ? "(in " + took.toFixed(2) + " ms)" : "");
-
+	
 	      // render
 	      try {
 	        if (isCollapsed) {
@@ -2036,28 +2036,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } catch (e) {
 	        logger.log(title);
 	      }
-
+	
 	      var prevStateLevel = getLogLevel(level, formattedAction, [prevState], "prevState");
 	      var actionLevel = getLogLevel(level, formattedAction, [formattedAction], "action");
 	      var errorLevel = getLogLevel(level, formattedAction, [error, prevState], "error");
 	      var nextStateLevel = getLogLevel(level, formattedAction, [nextState], "nextState");
-
+	
 	      if (prevStateLevel) {
 	        if (colors.prevState) logger[prevStateLevel]("%c prev state", "color: " + colors.prevState(prevState) + "; font-weight: bold", prevState);else logger[prevStateLevel]("prev state", prevState);
 	      }
-
+	
 	      if (actionLevel) {
 	        if (colors.action) logger[actionLevel]("%c action", "color: " + colors.action(formattedAction) + "; font-weight: bold", formattedAction);else logger[actionLevel]("action", formattedAction);
 	      }
-
+	
 	      if (error && errorLevel) {
 	        if (colors.error) logger[errorLevel]("%c error", "color: " + colors.error(error, prevState) + "; font-weight: bold", error);else logger[errorLevel]("error", error);
 	      }
-
+	
 	      if (nextStateLevel) {
 	        if (colors.nextState) logger[nextStateLevel]("%c next state", "color: " + colors.nextState(nextState) + "; font-weight: bold", nextState);else logger[nextStateLevel]("next state", nextState);
 	      }
-
+	
 	      try {
 	        logger.groupEnd();
 	      } catch (e) {
@@ -2066,7 +2066,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    logBuffer.length = 0;
 	  }
-
+	
 	  return function (_ref) {
 	    var getState = _ref.getState;
 	    return function (next) {
@@ -2075,15 +2075,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (typeof predicate === "function" && !predicate(getState, action)) {
 	          return next(action);
 	        }
-
+	
 	        var logEntry = {};
 	        logBuffer.push(logEntry);
-
+	
 	        logEntry.started = timer.now();
 	        logEntry.startedTime = new Date();
 	        logEntry.prevState = stateTransformer(getState());
 	        logEntry.action = action;
-
+	
 	        var returnedValue = undefined;
 	        if (logErrors) {
 	          try {
@@ -2094,19 +2094,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	          returnedValue = next(action);
 	        }
-
+	
 	        logEntry.took = timer.now() - logEntry.started;
 	        logEntry.nextState = stateTransformer(getState());
-
+	
 	        printBuffer();
-
+	
 	        if (logEntry.error) throw logEntry.error;
 	        return returnedValue;
 	      };
 	    };
 	  };
 	}
-
+	
 	module.exports = createLogger;
 
 /***/ },
@@ -2114,17 +2114,17 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	"use strict";
-
+	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
 	exports.default = empty;
-
+	
 	/* An empty reducer in case the user supplies no reducers */
 	function empty() {
 	  var state = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	  var action = arguments[1];
-
+	
 	  return state;
 	}
 
@@ -2132,3 +2132,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ])
 });
 ;
+//# sourceMappingURL=CyFramework.js.map

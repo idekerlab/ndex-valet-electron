@@ -11,9 +11,9 @@
       src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react-dom.js"></script>
   <script
       src="https://cdnjs.cloudflare.com/ajax/libs/fetch/1.0.0/fetch.min.js"></script>
+
   <script src="CyFramework/build/CyFramework.js"></script>
   <script src="NDExStore/build/NDExStore.js"></script>
-  <script src="NDExStore/build/NDExValet.map.js"></script>
   <script src="NDExValet/build/NDExValet.js"></script>
 
   <title>NDEx Valet</title>
@@ -58,6 +58,10 @@
     }
   };
 
+  var MESSAGE_TYPE = {
+    QUERY: "query"
+  };
+
   //Connect to Cytoscape with a web socket
   var cySocket = new WebSocket("ws://localhost:8025/ws/echo");
 
@@ -67,14 +71,17 @@
 
   //Listen for messages
   cySocket.onmessage = function (event) {
-    var msg = JSON.parse(event.data)
-    console.log("######## Got MSG from Cy3: " + msg);
+    var msg = JSON.parse(event.data);
+
+    console.log("# Got MSG from Cy3: " + msg);
 
     switch (msg.type) {
-      case "query":
-        //Send updates to stores
-        console.log("######## Query from Cy3: " + msg.body);
-        cyto.dispatch({type: "UPDATE_QUERY", query: msg.body})
+      case MESSAGE_TYPE.QUERY:
+        let query = msg.body;
+          
+        console.log("New query from Cy3: " + query);
+        cyto.dispatch(NDExValet.fieldActions.updateQuery(query));
+        cyto.dispatch(NDExStore.luceneActions.searchFor(query));
         break;
     }
   }
