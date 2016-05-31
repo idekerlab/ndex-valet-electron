@@ -50,7 +50,9 @@ function createWindow () {
     switch(msg.type) {
       case "focus":
         //Bring NDEx Valet into focus
-        mainWindow.show();
+        if(msg.from === "cy3") {
+          mainWindow.show();
+        }
         break;
     }
   }
