@@ -19,6 +19,7 @@
   <title>NDEx Valet</title>
 </head>
 <body>
+
 <div id='valet'>
 </div>
 <script>
@@ -33,21 +34,27 @@
       console.log(networkIds)
       networkIds.map(function (N) {
         console.log(N.externalId);
-        fetch('http://localhost:1234/v1/networks?source=url&format=cx&collection=NDEx', {
+        fetch('http://localhost:1234/v1/networks?source=url&format=cx&collection=From NDEx', {
           method: 'post',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(["http://dev2.ndexbio.org/rest/network/" + N.externalId + "/asCX"])
-        })
+        }).then(function(response) {
+          return response.json();
+        }).then(function(result) {
+          var suid = result[0]['networkSUID'];
+          console.log('SUID: ' + suid);
+          fetch('http://localhost:1234/v1/apply/layouts/force-directed/' + suid)
+        });
       })
     }
   })
 
 
   /////////////////////////////////////////////////////
-  // The following is the Electron app dependent code.
+  // The following is the Electron app dependent section.
   /////////////////////////////////////////////////////
 
   var MESSAGES = {
@@ -74,11 +81,14 @@
     var msg = JSON.parse(event.data);
 
     console.log("# Got MSG from Cy3: " + msg);
+    if(msg.from !== "cy3") {
+      return;
+    }
 
     switch (msg.type) {
       case MESSAGE_TYPE.QUERY:
         let query = msg.body;
-          
+
         console.log("New query from Cy3: " + query);
         cyto.dispatch(NDExValet.fieldActions.updateQuery(query));
         cyto.dispatch(NDExStore.luceneActions.searchFor(query));
