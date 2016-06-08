@@ -12,7 +12,6 @@ let isDevEnabled = false;
 let mainWindow
 
 function createWindow () {
-
   // Establish WS connection
   try {
     // Try Connection to server...
@@ -53,19 +52,19 @@ function createWindow () {
 
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1000, height: 830,
+    width: 1100, height: 850,
     minHeight: 830, minWidth: 500,
-    frame: false
+    frame: true
   })
   mainWindow.loadURL(`file://${__dirname}/ndex/index.html`)
-
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
     mainWindow = null
   })
-
 }
+
+
 
 function addShortcuts() {
   globalShortcut.register('CommandOrControl+w', function() {
@@ -89,7 +88,7 @@ function addShortcuts() {
 app.on('ready', () => {
   createWindow()
   addShortcuts()
-})
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
