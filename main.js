@@ -7,6 +7,8 @@ const WS_ADDRESS = "ws://localhost:8025/ws/echo"
 // Local connection to Cytoscape app
 let ws
 
+let isDevEnabled = false;
+
 let mainWindow
 
 function createWindow () {
@@ -50,9 +52,12 @@ function createWindow () {
   }
 
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1000, height: 780})
+  mainWindow = new BrowserWindow({
+    width: 1000, height: 830,
+    minHeight: 830, minWidth: 500,
+    frame: false
+  })
   mainWindow.loadURL(`file://${__dirname}/ndex/index.html`)
-  mainWindow.webContents.openDevTools();
 
 
   // Emitted when the window is closed.
@@ -66,6 +71,18 @@ function addShortcuts() {
   globalShortcut.register('CommandOrControl+w', function() {
     console.log('Close (w) is pressed');
     app.quit()
+  });
+
+  // For dev tool
+  globalShortcut.register('CommandOrControl+d', function() {
+    console.log('Devtool');
+    if(isDevEnabled) {
+      mainWindow.webContents.closeDevTools();
+      isDevEnabled = false;
+    } else {
+      mainWindow.webContents.openDevTools();
+      isDevEnabled = true;
+    }
   });
 }
 
