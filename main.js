@@ -33,10 +33,13 @@ function createWindow () {
     ws.onmessage = function(event) {
       var msg = JSON.parse(event.data)
       switch(msg.type) {
-        case "focus":
+        case "focus-success":
           //Bring NDEx Valet into focus
           if(msg.from === "cy3") {
-            mainWindow.show();
+              mainWindow.setAlwaysOnTop(true);
+              mainWindow.show();
+              // mainWindow.focus();
+              mainWindow.setAlwaysOnTop(false);
           }
           break;
       }
