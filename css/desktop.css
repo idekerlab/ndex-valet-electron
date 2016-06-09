@@ -1,0 +1,15 @@
+#valet {
+    height: 98%;
+    position: fixed;
+    top: 0;
+}
+
+#button-bar {
+    position: fixed;
+    bottom: 0;
+    margin: 0;
+    padding: 0.4em;
+    width: 100%;
+    height: 2.6em;
+    background-color: #eeeeee;
+}

@@ -1,39 +1,27 @@
 <html>
 <head>
-  <link href='https://fonts.googleapis.com/css?family=Roboto:300,400'
-        rel='stylesheet' type='text/css'>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-        rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:300,400' rel='stylesheet' type='text/css'>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-  <link rel="stylesheet" href="../css/photon.min.css">
-
-  <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react-with-addons.js">
-  </script>
-  <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react-dom.js"></script>
-  <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/fetch/1.0.0/fetch.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react-with-addons.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react-dom.js"></script>
 
   <script src="CyFramework/build/CyFramework.js"></script>
   <script src="NDExStore/build/NDExStore.js"></script>
   <script src="NDExValet/build/NDExValet.js"></script>
 
-
-  <style>
-    #valet {
-      height: 94%;
-    }
-  </style>
+  <!--Electron only dependency-->
+  <link rel="stylesheet" href="../css/photon.min.css">
+  <link rel="stylesheet" href="../css/desktop.css">
 
   <title>NDEx Valet</title>
 </head>
-<body style="-webkit-app-region: drag">
+<body>
 
 <div id='valet'>
 </div>
 
-<div class="toolbar-actions" style="margin: 0; padding: 15px; background-color: #eeeeee">
+<div id="button-bar" class="toolbar-actions">
 
   <button id="close" class="btn btn-primary pull-right">
     Close NDEx Valet
