@@ -19,9 +19,10 @@
   <script src="NDExStore/build/NDExStore.js"></script>
   <script src="NDExValet/build/NDExValet.js"></script>
 
+
   <style>
     #valet {
-      height: 97%;
+      height: 94%;
     }
   </style>
 
@@ -29,106 +30,24 @@
 </head>
 <body style="-webkit-app-region: drag">
 
-<header class="toolbar toolbar-header">
-  <div class="toolbar-actions">
-
-    <button id="close" class="btn btn-primary pull-right">
-      Close NDEx Valet
-    </button>
-  </div>
-</header>
-
 <div id='valet'>
 </div>
 
-<script>
-  const remote = require('electron').remote;
+<div class="toolbar-actions" style="margin: 0; padding: 15px; background-color: #eeeeee">
 
-  function addCloseButton() {
+  <button id="close" class="btn btn-primary pull-right">
+    Close NDEx Valet
+  </button>
+  <button id="reload" class="btn btn-default pull-right">
+    <span class="icon icon-cw icon-text"></span>
+    Restart Search
+  </button>
+  <button id="help" class="btn btn-default pull-right">
+    <span class="icon icon-help"></span>
+  </button>
 
-    document.getElementById("close").addEventListener("click", function (e) {
-      var window = remote.getCurrentWindow();
-      window.close();
-    });
+</div>
+<script src="../renderer.js"></script>
 
-    init();
-  }
-
-  function init() {
-    //Create the framework instance
-    var cyto = CyFramework.config([NDExValet, NDExStore])
-
-    //Render NDEx Valet into the div
-    cyto.render(NDExValet, document.getElementById('valet'), {
-      onLoad: function (networkIds) {
-        console.log(networkIds)
-        networkIds.map(function (N) {
-          console.log(N.externalId);
-          fetch('http://localhost:1234/v1/networks?source=url&format=cx&collection=From NDEx', {
-            method: 'post',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(["http://dev2.ndexbio.org/rest/network/" + N.externalId + "/asCX"])
-          }).then(function (response) {
-            return response.json();
-          }).then(function (result) {
-            var suid = result[0]['networkSUID'];
-            console.log('SUID: ' + suid);
-            fetch('http://localhost:1234/v1/apply/layouts/force-directed/' + suid)
-          });
-        })
-      }
-    })
-
-
-    /////////////////////////////////////////////////////
-    // The following is the Electron app dependent section.
-    /////////////////////////////////////////////////////
-
-    var MESSAGES = {
-      CONNECT: {
-        from: "ndex",
-        type: "connected",
-        body: ""
-      }
-    };
-
-    var MESSAGE_TYPE = {
-      QUERY: "query"
-    };
-
-    //Connect to Cytoscape with a web socket
-    var cySocket = new WebSocket("ws://localhost:8025/ws/echo");
-
-    cySocket.onopen = function () {
-      cySocket.send(JSON.stringify(MESSAGES.CONNECT));
-    };
-
-    //Listen for messages
-    cySocket.onmessage = function (event) {
-      var msg = JSON.parse(event.data);
-
-      if (msg.from !== "cy3") {
-        return;
-      }
-
-      switch (msg.type) {
-        case MESSAGE_TYPE.QUERY:
-          let query = msg.body;
-
-          console.log("New query from Cy3: " + query);
-          cyto.dispatch(NDExValet.fieldActions.updateQuery(query));
-          cyto.dispatch(NDExStore.luceneActions.searchFor(query));
-          break;
-      }
-    }
-  }
-
-
-  addCloseButton();
-
-</script>
 </body>
 </html>
