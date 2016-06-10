@@ -24,6 +24,7 @@
     "electron-prebuilt": "^1.2.0"
   },
   "dependencies": {
+    "sleep": "^3.0.1",
     "ws": "^1.1.0"
   }
 }

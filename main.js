@@ -1,5 +1,6 @@
 const {app, globalShortcut, BrowserWindow} = require('electron')
 const WebSocket = require('ws')
+const sleep = require('sleep')
 
 
 const WS_ADDRESS = "ws://localhost:8025/ws/echo"
@@ -11,6 +12,8 @@ let isDevEnabled = false;
 
 let mainWindow
 
+let focusFlag = false;
+
 function createWindow () {
   // Establish WS connection
   try {
@@ -18,7 +21,14 @@ function createWindow () {
     ws = new WebSocket(WS_ADDRESS)
 
     ws.onopen = function() {
+
       app.on('browser-window-focus', function() {
+
+        if(focusFlag) {
+          focusFlag = false;
+          return;
+        }
+
         var msg = {
           from: "ndex",
           type: "focus",
@@ -27,6 +37,10 @@ function createWindow () {
 
         ws.send(JSON.stringify(msg));
       });
+
+      // app.on('browser-window-blur', function() {
+      //   mainWindow.setAlwaysOnTop(false);
+      // });
     };
 
     //Listen for messages
@@ -37,9 +51,24 @@ function createWindow () {
           //Bring NDEx Valet into focus
           if(msg.from === "cy3") {
               mainWindow.setAlwaysOnTop(true);
+              sleep.usleep(200);
               mainWindow.show();
-              // mainWindow.focus();
               mainWindow.setAlwaysOnTop(false);
+          }
+          break;
+        case "focus":
+          //Bring NDEx Valet into focus
+          if(msg.from === "cy3") {
+            focusFlag = true;
+            mainWindow.show();
+            sleep.usleep(200);
+            mainWindow.blur();
+          }
+          break;
+        case "focus-lost":
+          //Bring NDEx Valet into focus
+          if(msg.from === "cy3") {
+            mainWindow.setAlwaysOnTop(false);
           }
           break;
       }
