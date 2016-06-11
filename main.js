@@ -12,20 +12,20 @@ let isDevEnabled = false;
 
 let mainWindow
 
-let focusFlag = false;
+let block = false;
 
-function createWindow () {
+
+function createWindow() {
   // Establish WS connection
   try {
     // Try Connection to server...
     ws = new WebSocket(WS_ADDRESS)
 
-    ws.onopen = function() {
+    ws.onopen = function () {
 
-      app.on('browser-window-focus', function() {
+      mainWindow.on('focus', function () {
 
-        if(focusFlag) {
-          focusFlag = false;
+        if(block) {
           return;
         }
 
@@ -34,47 +34,40 @@ function createWindow () {
           type: "focus",
           body: "Ndex focused "
         };
-
         ws.send(JSON.stringify(msg));
       });
-
-      // app.on('browser-window-blur', function() {
-      //   mainWindow.setAlwaysOnTop(false);
-      // });
     };
 
     //Listen for messages
-    ws.onmessage = function(event) {
+    ws.onmessage = function (event) {
       var msg = JSON.parse(event.data)
-      switch(msg.type) {
+
+      // Filter: ignore ndex messages
+      if (msg.from === "ndex") {
+        return;
+      }
+
+      switch (msg.type) {
         case "focus-success":
-          //Bring NDEx Valet into focus
-          if(msg.from === "cy3") {
-              mainWindow.setAlwaysOnTop(true);
-              sleep.usleep(200);
-              mainWindow.show();
-              mainWindow.setAlwaysOnTop(false);
-          }
           break;
         case "focus":
-          //Bring NDEx Valet into focus
-          if(msg.from === "cy3") {
-            focusFlag = true;
-            mainWindow.show();
-            sleep.usleep(200);
-            mainWindow.blur();
-          }
-          break;
-        case "focus-lost":
-          //Bring NDEx Valet into focus
-          if(msg.from === "cy3") {
-            mainWindow.setAlwaysOnTop(false);
-          }
+          block = true;
+          mainWindow.showInactive();
+
+          var msg = {
+            from: "ndex",
+            type: "focus-success",
+            body: "Ndex focuse Success"
+          };
+
+          ws.send(JSON.stringify(msg));
+
+          block = false;
           break;
       }
     };
 
-    ws.onclose = function() {
+    ws.onclose = function () {
       app.quit()
     };
 
@@ -86,9 +79,10 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     width: 1100, height: 870,
     minHeight: 870, minWidth: 500,
-    frame: true
+    frame: true, alwaysOnTop:false
   })
-  mainWindow.loadURL(`file://${__dirname}/ndex/index.html`)
+
+  mainWindow.loadURL(`file://${__dirname}/ndex/index.html`);
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
@@ -97,17 +91,16 @@ function createWindow () {
 }
 
 
-
 function addShortcuts() {
-  globalShortcut.register('CommandOrControl+w', function() {
+  globalShortcut.register('CommandOrControl+w', function () {
     console.log('Close (w) is pressed');
     app.quit()
   });
 
   // For dev tool
-  globalShortcut.register('CommandOrControl+d', function() {
+  globalShortcut.register('CommandOrControl+d', function () {
     console.log('Devtool');
-    if(isDevEnabled) {
+    if (isDevEnabled) {
       mainWindow.webContents.closeDevTools();
       isDevEnabled = false;
     } else {
@@ -118,13 +111,13 @@ function addShortcuts() {
 }
 
 app.on('ready', () => {
-  createWindow()
-  addShortcuts()
+  createWindow();
+  addShortcuts();
 });
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
-    app.quit()
+  app.quit()
 })
 
 app.on('activate', function () {
