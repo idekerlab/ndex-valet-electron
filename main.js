@@ -40,15 +40,21 @@ function createWindow() {
 
     //Listen for messages
     ws.onmessage = function (event) {
-      var msg = JSON.parse(event.data)
+      let msgObj = JSON.parse(event.data)
 
       // Filter: ignore ndex messages
-      if (msg.from === "ndex") {
+      if (msgObj.from === "ndex") {
         return;
       }
 
-      switch (msg.type) {
+      switch (msgObj.type) {
         case "focus-success":
+          block = true;
+          mainWindow.setAlwaysOnTop(true);
+          mainWindow.show();
+          mainWindow.focus();
+          mainWindow.setAlwaysOnTop(false);
+          block = false;
           break;
         case "focus":
           block = true;
