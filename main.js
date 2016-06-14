@@ -15,6 +15,7 @@ let mainWindow
 let block = false;
 
 
+
 function createWindow() {
   // Establish WS connection
   try {
@@ -82,13 +83,24 @@ function createWindow() {
       app.quit()
     };
 
+    setInterval(function() {
+      "use strict";
+      let alive = {
+        from: "ndex",
+        type: "alive",
+        body: "NDEx Main alive"
+      };
+
+      ws.send(JSON.stringify(alive));
+    }, 120000);
+
   } catch (e) {
     console.log(e);
   }
 
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1100, height: 870,
+    width: 1150, height: 870,
     minHeight: 870, minWidth: 500,
     frame: true, alwaysOnTop:false
   })

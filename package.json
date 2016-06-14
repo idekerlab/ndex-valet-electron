@@ -5,7 +5,8 @@
   "description": "Electron version of NDEx Valet",
   "main": "main.js",
   "scripts": {
-    "start": "electron main.js"
+    "start": "electron main.js",
+    "build": "./build-all.sh"
   },
   "repository": {
     "type": "git",
@@ -25,7 +26,6 @@
     "electron-prebuilt": "^1.2.0"
   },
   "dependencies": {
-    "sleep": "^3.0.1",
     "ws": "^1.1.0"
   }
 }

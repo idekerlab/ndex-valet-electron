@@ -1,5 +1,6 @@
 const remote = require('electron').remote;
 
+
 function addCloseButton() {
 
   document.getElementById("close").addEventListener("click", function (e) {
@@ -9,6 +10,8 @@ function addCloseButton() {
 
   init();
 }
+
+let cySocket;
 
 function init() {
   //Create the framework instance
@@ -48,6 +51,12 @@ function init() {
       from: "ndex",
       type: "connected",
       body: ""
+    },
+
+    ALIVE: {
+      from: "ndex",
+      type: "alive",
+      body: "from renderer"
     }
   };
 
@@ -56,7 +65,7 @@ function init() {
   };
 
   //Connect to Cytoscape with a web socket
-  var cySocket = new WebSocket("ws://localhost:8025/ws/echo");
+  cySocket = new WebSocket("ws://localhost:8025/ws/echo");
 
   cySocket.onopen = function () {
     cySocket.send(JSON.stringify(MESSAGES.CONNECT));
@@ -79,6 +88,12 @@ function init() {
         break;
     }
   }
+
+  // Keep alive by sending notification...
+  setInterval(function() {
+    cySocket.send(JSON.stringify(MESSAGES.ALIVE));
+  }, 120000);
+
 }
 
 
