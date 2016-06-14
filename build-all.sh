@@ -20,6 +20,7 @@ cp NDEx-Valet-linux.tar.gz ../ndex-valet/src/main/resources/ndex/
 
 
 # For Windows: 64bit
+rm -rf ./NDEx-*
 electron-packager . --platform=win32 --arch=x64
 mv NDEx-Valet-win32-x64 NDEx-Valet-win64
 zip -r NDEx-Valet-win64.zip ./NDEx-Valet-win64
