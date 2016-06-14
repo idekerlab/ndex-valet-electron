@@ -7,12 +7,6 @@ function addCloseButton() {
     window.close();
   });
 
-  document.getElementById("reload").addEventListener("click", function (e) {
-    var window = remote.getCurrentWindow();
-    window.webContents.reload();
-  });
-
-
   init();
 }
 
@@ -79,7 +73,6 @@ function init() {
     switch (msg.type) {
       case MESSAGE_TYPE.QUERY:
         let query = msg.body;
-
         console.log("New query from Cy3: " + query);
         cyto.dispatch(NDExValet.fieldActions.updateQuery(query));
         cyto.dispatch(NDExStore.luceneActions.searchFor(query));

@@ -49,17 +49,22 @@ function createWindow() {
 
       switch (msgObj.type) {
         case "focus-success":
-          block = true;
-          mainWindow.setAlwaysOnTop(true);
-          mainWindow.show();
-          mainWindow.focus();
-          mainWindow.setAlwaysOnTop(false);
-          block = false;
+          // if(!mainWindow.isFocused()) {
+          //   block = true;
+          //   mainWindow.setAlwaysOnTop(true);
+          //   mainWindow.show();
+          //   mainWindow.focus();
+          //   mainWindow.setAlwaysOnTop(false);
+          //   block = false;
+          // }
           break;
         case "focus":
           block = true;
-          mainWindow.showInactive();
-
+          if(!mainWindow.isFocused()) {
+            mainWindow.setAlwaysOnTop(true);
+            mainWindow.showInactive();
+            mainWindow.setAlwaysOnTop(false);
+          }
           var msg = {
             from: "ndex",
             type: "focus-success",
