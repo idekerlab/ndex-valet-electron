@@ -2,7 +2,7 @@
   "name": "ndex-valet-electron",
   "productName": "NDEx-Valet",
   "version": "1.0.0",
-  "description": "Electron version of NDEx Valet",
+  "description": "NDEx Valet desktop app using Electron",
   "main": "main.js",
   "scripts": {
     "start": "electron main.js",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/keiono/ndex-valet-electron.git"
+    "url": "git+https://github.com/idekerlab/ndex-valet-electron.git"
   },
   "keywords": [
     "Electron",
@@ -20,7 +20,7 @@
   ],
   "author": "Keiichiro Ono",
   "license": "MIT",
-  "homepage": "https://github.com/keiono/ndex-valet-electron#readme",
+  "homepage": "https://github.com/idekerlab/ndex-valet-electron#readme",
   "devDependencies": {
     "devtron": "^1.2.0",
     "electron-prebuilt": "^1.2.0"
