@@ -1,16 +1,15 @@
-const {app, globalShortcut, BrowserWindow} = require('electron')
-const WebSocket = require('ws')
-const sleep = require('sleep')
+const {app, globalShortcut, BrowserWindow} = require('electron');
+const WebSocket = require('ws');
 
 
-const WS_ADDRESS = "ws://localhost:8025/ws/echo"
+const WS_ADDRESS = "ws://localhost:8025/ws/echo";
 
 // Local connection to Cytoscape app
-let ws
+let ws;
 
 let isDevEnabled = false;
 
-let mainWindow
+let mainWindow;
 
 let block = false;
 
@@ -20,13 +19,11 @@ function createWindow() {
   // Establish WS connection
   try {
     // Try Connection to server...
-    ws = new WebSocket(WS_ADDRESS)
+    ws = new WebSocket(WS_ADDRESS);
 
     ws.onopen = function () {
-
-      mainWindow.on('focus', function () {
-
-        if(block) {
+      mainWindow.on('focus', () => {
+        if (block) {
           return;
         }
 
@@ -41,7 +38,7 @@ function createWindow() {
 
     //Listen for messages
     ws.onmessage = function (event) {
-      let msgObj = JSON.parse(event.data)
+      let msgObj = JSON.parse(event.data);
 
       // Filter: ignore ndex messages
       if (msgObj.from === "ndex") {
@@ -103,7 +100,7 @@ function createWindow() {
     width: 1150, height: 870,
     minHeight: 870, minWidth: 500,
     frame: true, alwaysOnTop:false
-  })
+  });
 
   mainWindow.loadURL(`file://${__dirname}/webapp/ndex/index.html`);
 
@@ -141,10 +138,10 @@ app.on('ready', () => {
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
   app.quit()
-})
+});
 
 app.on('activate', function () {
   if (mainWindow === null) {
     createWindow()
   }
-})
+});
