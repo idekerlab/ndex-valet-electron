@@ -105,7 +105,7 @@ function createWindow() {
     frame: true, alwaysOnTop:false
   })
 
-  mainWindow.loadURL(`file://${__dirname}/ndex/index.html`);
+  mainWindow.loadURL(`file://${__dirname}/webapp/ndex/index.html`);
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
