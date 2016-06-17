@@ -5,6 +5,9 @@ function addCloseButton() {
     remote.getCurrentWindow().close();
   });
   init();
+
+  console.log("============= Ready ===============");
+  console.log(process.argv);
 }
 
 let cySocket;

@@ -13,30 +13,54 @@ let mainWindow;
 
 let block = false;
 
+console.log("============= Starting Main2 ===============");
 
 
-function createWindow() {
-  // Establish WS connection
+const MSG_SELECT_APP = {
+  from: 'ndex',
+  type: 'app',
+  body: ''
+};
+
+const MSG_FOCUS = {
+  from: "ndex",
+  type: "focus",
+  body: "Ndex focused "
+};
+
+function initWindow(appType) {
+  // Create the browser window.
+  mainWindow = new BrowserWindow({
+    width: 1150, height: 870,
+    minHeight: 870, minWidth: 500,
+    frame: true, alwaysOnTop:false
+  });
+
+  const dir = `${__dirname}`;
+  mainWindow.loadURL('file://' + dir + '/webapp/' + appType + '/index.html');
+
+  // Emitted when the window is closed.
+  mainWindow.on('focus', () => {
+    if (block) {
+      return;
+    }
+    ws.send(JSON.stringify(MSG_FOCUS));
+  });
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+}
+
+function initSocket() {
   try {
     // Try Connection to server...
     ws = new WebSocket(WS_ADDRESS);
 
-    ws.onopen = function () {
-      mainWindow.on('focus', () => {
-        if (block) {
-          return;
-        }
-
-        var msg = {
-          from: "ndex",
-          type: "focus",
-          body: "Ndex focused "
-        };
-        ws.send(JSON.stringify(msg));
-      });
+    ws.onopen = () => {
+      ws.send(JSON.stringify(MSG_SELECT_APP));
     };
 
-    //Listen for messages
+    // Listen for messages
     ws.onmessage = function (event) {
       let msgObj = JSON.parse(event.data);
 
@@ -46,6 +70,10 @@ function createWindow() {
       }
 
       switch (msgObj.type) {
+        case 'app':
+          console.log(msgObj);
+          initWindow(msgObj.body);
+          break;
         case "focus-success":
           // if(!mainWindow.isFocused()) {
           //   block = true;
@@ -94,20 +122,12 @@ function createWindow() {
   } catch (e) {
     console.log(e);
   }
+}
 
-  // Create the browser window.
-  mainWindow = new BrowserWindow({
-    width: 1150, height: 870,
-    minHeight: 870, minWidth: 500,
-    frame: true, alwaysOnTop:false
-  });
 
-  mainWindow.loadURL(`file://${__dirname}/webapp/ndex/index.html`);
-
-  // Emitted when the window is closed.
-  mainWindow.on('closed', function () {
-    mainWindow = null
-  })
+function createWindow() {
+  // Establish WS connection
+  initSocket();
 }
 
 
