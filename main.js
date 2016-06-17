@@ -1,19 +1,32 @@
-const {app, globalShortcut, BrowserWindow} = require('electron');
+// Logging
+const LOGGER = require('winston');
+
+const APP_NAME_VALET = 'ndex';
+const APP_NAME_SAVE = 'ndex-save';
+
+const APP_CONFIG_VALET = require('./webapp/ndex/config');
+const APP_CONFIG_SAVE = require('./webapp/ndex-save/config');
+
+console.log(APP_CONFIG_VALET);
+
+const APP_CONFIG_MAP = new Map();
+APP_CONFIG_MAP.set(APP_NAME_VALET, APP_CONFIG_VALET);
+APP_CONFIG_MAP.set(APP_NAME_SAVE, APP_CONFIG_SAVE);
+
+// Required Electron components
+const { app, globalShortcut, BrowserWindow } = require('electron');
+
+// For duplex communication
 const WebSocket = require('ws');
 
+// TODO: make this injectable
+const WS_ADDRESS = 'ws://localhost:8025/ws/echo';
 
-const WS_ADDRESS = "ws://localhost:8025/ws/echo";
-
-// Local connection to Cytoscape app
 let ws;
-
-let isDevEnabled = false;
-
 let mainWindow;
 
 let block = false;
-
-console.log("============= Starting Main2 ===============");
+let isDevEnabled = false;
 
 
 const MSG_SELECT_APP = {
@@ -23,18 +36,28 @@ const MSG_SELECT_APP = {
 };
 
 const MSG_FOCUS = {
-  from: "ndex",
-  type: "focus",
-  body: "Ndex focused "
+  from: 'ndex',
+  type: 'focus',
+  body: 'Ndex focused'
 };
+
+const MSG_SAVE = {
+  from: 'ndex',
+  type: 'save',
+  body: ''
+};
+
+function initLogger() {
+  LOGGER.add(LOGGER.transports.File, { filename: 'electron-app.log' });
+  LOGGER.level = 'debug';
+  LOGGER.log('debug', 'Starting app');
+}
 
 function initWindow(appType) {
   // Create the browser window.
-  mainWindow = new BrowserWindow({
-    width: 1150, height: 870,
-    minHeight: 870, minWidth: 500,
-    frame: true, alwaysOnTop:false
-  });
+  LOGGER.log('debug', 'Target app = ' + appType);
+
+  mainWindow = new BrowserWindow(APP_CONFIG_MAP.get(appType));
 
   const dir = `${__dirname}`;
   mainWindow.loadURL('file://' + dir + '/webapp/' + appType + '/index.html');
@@ -49,6 +72,14 @@ function initWindow(appType) {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+
+  if (appType === APP_NAME_SAVE) {
+    initSave();
+  }
+}
+
+function initSave() {
+  ws.send(JSON.stringify(MSG_SAVE));
 }
 
 function initSocket() {
@@ -63,6 +94,9 @@ function initSocket() {
     // Listen for messages
     ws.onmessage = function (event) {
       let msgObj = JSON.parse(event.data);
+
+      LOGGER.log("debug", '$$$$$$$$MSG: ');
+      LOGGER.log('debug', msgObj);
 
       // Filter: ignore ndex messages
       if (msgObj.from === "ndex") {
@@ -101,6 +135,11 @@ function initSocket() {
 
           block = false;
           break;
+        case "save":
+          let suid = msgObj.body;
+          LOGGER.log("debug", 'Got SUID: ' + suid);
+          mainWindow.setTitle('Save to NDEx: ' + suid);
+          break;
       }
     };
 
@@ -126,6 +165,7 @@ function initSocket() {
 
 
 function createWindow() {
+  initLogger();
   // Establish WS connection
   initSocket();
 }

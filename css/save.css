@@ -1,5 +1,5 @@
-#valet {
-    height: 98%;
+#save {
+    height: 96%;
     width: 100%;
     position: fixed;
     top: 0;
@@ -14,3 +14,4 @@
     height: 2.6em;
     background-color: #eeeeee;
 }
+

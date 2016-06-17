@@ -3,5 +3,9 @@ module.exports = {
     "installedESLint": true,
     "plugins": [
         "react"
-    ]
+    ],
+    "rules": {
+        "semi": ["error", "always"],
+        "quotes": ["error", "single"]
+    }
 };
