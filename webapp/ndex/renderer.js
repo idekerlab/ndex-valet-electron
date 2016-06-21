@@ -8,6 +8,14 @@ const ID_COLUMN = {
   immutable: true,
   local: true };
 
+const EMPTY_NET = {
+  data: {},
+  elements: {
+    nodes: [],
+    edges: []
+  }
+};
+
 function addCloseButton() {
   document.getElementById(CLOSE_BUTTON_ID)
     .addEventListener('click', () => {
@@ -55,6 +63,17 @@ function buildQuery(type) {
 }
 
 
+
+function createNetworkList(networkUuid) {
+  "use strict";
+  let source = 'http://dev2.ndexbio.org/rest/network/' + networkUuid + '/asCX';
+  return {
+    source_location: source,
+    source_method: 'GET',
+    ndex_uuid: networkUuid
+  };
+}
+
 function init() {
   //Create the framework instance
   var cyto = CyFramework.config([NDExValet, NDExStore])
@@ -63,8 +82,19 @@ function init() {
   cyto.render(NDExValet, document.getElementById('valet'), {
     onLoad: function (networkIds) {
       console.log(networkIds)
+      fetch('http://localhost:1234/v1/networks?collection=From NDEx', {
+        method: 'post',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json' },
+        body: JSON.stringify([EMPTY_NET])
+      });
+
       networkIds.map(function (N) {
-        console.log(N.externalId);
+        console.log("----------------");
+        let entry = createNetworkList(N.externalId);
+        console.log(entry);
+
         let suid = null;
 
         fetch('http://localhost:1234/v1/networks?source=url&format=cx&collection=From NDEx', {
@@ -73,7 +103,8 @@ function init() {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json' },
-          body: JSON.stringify(['http://dev2.ndexbio.org/rest/network/' + N.externalId + '/asCX'])
+          // body: JSON.stringify(['http://dev2.ndexbio.org/rest/network/' + N.externalId + '/asCX'])
+          body: JSON.stringify([entry])
         }).then(response => {
           return response.json()
         }).then(function (result) {
