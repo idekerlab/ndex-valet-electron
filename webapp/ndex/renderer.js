@@ -1,6 +1,6 @@
 const remote = require('electron').remote;
 
-const CLOSE_BUTTON = 'close';
+const CLOSE_BUTTON_ID = 'close';
 
 const ID_COLUMN = {
   name: 'NDEX_UUID',
@@ -9,7 +9,7 @@ const ID_COLUMN = {
   local: true };
 
 function addCloseButton() {
-  document.getElementById(CLOSE_BUTTON)
+  document.getElementById(CLOSE_BUTTON_ID)
     .addEventListener('click', () => {
       remote.getCurrentWindow().close();
     });
@@ -23,19 +23,19 @@ function buildQuery(type) {
   let query = {};
 
   switch (type) {
-    case 'column':
+    case 'column': {
       const createCol = {
         method: 'post',
         headers: {
-          'Accept': 'application/json',
+          Accept: 'application/json',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify([ID_COLUMN])
       };
       query = createCol;
-
       break;
-    case 'uuid':
+    }
+    case 'uuid': {
       const updateTable = {
         method: 'put',
         headers: {
@@ -47,6 +47,8 @@ function buildQuery(type) {
       query = updateTable;
 
       break;
+    }
+    default: { break; }
   }
 
   return query;
@@ -69,9 +71,8 @@ function init() {
 
           method: 'post',
           headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
+            Accept: 'application/json',
+            'Content-Type': 'application/json' },
           body: JSON.stringify(['http://dev2.ndexbio.org/rest/network/' + N.externalId + '/asCX'])
         }).then(response => {
           return response.json()
