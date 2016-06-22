@@ -2,6 +2,10 @@ const remote = require('electron').remote;
 
 const CLOSE_BUTTON_ID = 'close';
 
+const CYREST_CALL = {
+  NETWORKS: 'http://localhost:1234/v1/networks' };
+
+
 const ID_COLUMN = {
   name: 'NDEX_UUID',
   type: 'String',
@@ -64,73 +68,49 @@ function buildQuery(type) {
 
 
 
-function createNetworkList(networkUuid) {
-  "use strict";
-  let source = 'http://dev2.ndexbio.org/rest/network/' + networkUuid + '/asCX';
-  return {
-    source_location: source,
-    source_method: 'GET',
-    ndex_uuid: networkUuid
-  };
+function createNetworkList(idList) {
+
+  let list = [];
+
+  idList.map( id => {
+    let source = 'http://dev2.ndexbio.org/rest/network/' + id.externalId + '/asCX';
+    let entry = {
+      source_location: source,
+      source_method: 'GET',
+      ndex_uuid: id.externalId
+    };
+    list.push(entry);
+  });
+
+  return list;
+}
+
+function getCyRestQuery(query, ids) {
+  if (query === 'import') {
+    return {
+      method: 'post',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json' },
+      body: JSON.stringify(createNetworkList(ids))
+    };
+  }
 }
 
 function init() {
-  //Create the framework instance
-  var cyto = CyFramework.config([NDExValet, NDExStore])
+  // Create the framework instance
+  const cyto = CyFramework.config([NDExValet, NDExStore]);
 
   // Render NDEx Valet into the div
   cyto.render(NDExValet, document.getElementById('valet'), {
-    onLoad: function (networkIds) {
-      console.log(networkIds)
-      fetch('http://localhost:1234/v1/networks?collection=From NDEx', {
-        method: 'post',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json' },
-        body: JSON.stringify([EMPTY_NET])
-      });
-
-      networkIds.map(function (N) {
-        console.log("----------------");
-        let entry = createNetworkList(N.externalId);
-        console.log(entry);
-
-        let suid = null;
-
-        fetch('http://localhost:1234/v1/networks?source=url&format=cx&collection=From NDEx', {
-
-          method: 'post',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json' },
-          // body: JSON.stringify(['http://dev2.ndexbio.org/rest/network/' + N.externalId + '/asCX'])
-          body: JSON.stringify([entry])
-        }).then(response => {
-          return response.json()
-        }).then(function (result) {
-          suid = result[0]['networkSUID'];
-          console.log('SUID: ' + suid);
-          fetch('http://localhost:1234/v1/apply/layouts/force-directed/' + suid)
-            .then(() => {
-              let q1 = buildQuery('column');
-              fetch('http://localhost:1234/v1/networks/' + suid + '/tables/defaultnetwork/columns', q1)
-                .then(() => {
-                  let q2 = buildQuery('uuid');
-                  q2.body = JSON.stringify([]);
-                  fetch('http://localhost:1234/v1/networks/' + suid + '/tables/defaultnetwork/columns/NDEX_UUID?default=' + N.externalId, q2);
-                });
-            });
-        });
-
-      });
+      onLoad: function (networkIds) {
+        const q = getCyRestQuery('import', networkIds);
+        console.log("Calling:");
+        console.log(q);
+        fetch(CYREST_CALL.NETWORKS, q);
+      }
     }
-  });
-
-
-  /////////////////////////////////////////////////////
-  // The following is the Electron app dependent section.
-  /////////////////////////////////////////////////////
-
+  );
 
   var MESSAGES = {
     CONNECT: {
@@ -179,7 +159,6 @@ function init() {
   setInterval(function () {
     cySocket.send(JSON.stringify(MESSAGES.ALIVE));
   }, 120000);
-
 }
 
 
