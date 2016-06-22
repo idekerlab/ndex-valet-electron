@@ -6,6 +6,8 @@ module.exports = {
     ],
     "rules": {
         "semi": ["error", "always"],
-        "quotes": ["error", "single"]
+        "quotes": ["error", "single"],
+        "comma-dangle": ["error", "never"],
+        "arrow-body-style": ["error", "as-needed"]
     }
 };

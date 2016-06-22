@@ -2,15 +2,22 @@ const remote = require('electron').remote;
 
 const CLOSE_BUTTON_ID = 'close';
 
+const HEADERS = {
+  Accept: 'application/json',
+    'Content-Type': 'application/json'
+};
+
 const CYREST = {
-  IMPORT_NET: 'http://localhost:1234/v1/networks?format=cx&source=url' };
+  IMPORT_NET: 'http://localhost:1234/v1/networks?format=cx&source=url'
+};
 
 
 const ID_COLUMN = {
   name: 'NDEX_UUID',
   type: 'String',
   immutable: true,
-  local: true };
+  local: true
+};
 
 const EMPTY_NET = {
   data: {},
@@ -35,7 +42,8 @@ function buildQuery(type) {
   let query = {};
 
   switch (type) {
-    case 'column': {
+    case 'column':
+    {
       const createCol = {
         method: 'post',
         headers: {
@@ -47,7 +55,8 @@ function buildQuery(type) {
       query = createCol;
       break;
     }
-    case 'uuid': {
+    case 'uuid':
+    {
       const updateTable = {
         method: 'put',
         headers: {
@@ -60,7 +69,10 @@ function buildQuery(type) {
 
       break;
     }
-    default: { break; }
+    default:
+    {
+      break;
+    }
   }
 
   return query;
@@ -69,7 +81,7 @@ function buildQuery(type) {
 function createNetworkList(idList) {
   let list = [];
 
-  idList.map( id => {
+  idList.map(id => {
     let source = 'http://dev2.ndexbio.org/rest/network/' + id.externalId + '/asCX';
     let entry = {
       source_location: source,
@@ -81,31 +93,76 @@ function createNetworkList(idList) {
   return list;
 }
 
-function getCyRestQuery(query, ids) {
-  if (query === 'import') {
-    return {
-      method: 'post',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json' },
-      body: JSON.stringify(createNetworkList(ids))
-    };
-  }
+function getImportQuery(ids) {
+  return {
+    method: 'post',
+    headers: HEADERS,
+    body: JSON.stringify(createNetworkList(ids))
+  };
+}
+
+function applyLayout(results) {
+  results.map(result => {
+    const suid = result.networkSUID;
+    fetch('http://localhost:1234/v1/apply/layouts/force-directed/' + suid);
+  });
+}
+
+
+function importAsOneCollection(ids) {
+  const ct = new Date();
+  const ctStr = ct.getHours() + ':' + ct.getMinutes() + ':' + ct.getSeconds() +
+    ' ' + ct.getFullYear() +'/' + (ct.getMonth() + 1) + '/' + ct.getDate();
+  const collectionName = 'From NDEx (' + ctStr + ')';
+
+  createDummy(collectionName, ids);
+}
+
+function importAll(collectionName, ids, dummy) {
+  fetch(CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(ids))
+    .then(response => { return response.json(); })
+    .then(json => { applyLayout(json); })
+    .then(() => deleteDummy(dummy));
+}
+
+function deleteDummy(dummy) {
+  const q =  {
+    method: 'delete',
+    headers: HEADERS
+  };
+
+  fetch('http://localhost:1234/v1/networks/' +dummy, q);
+
+}
+
+function createDummy(collectionName, ids) {
+  const q =  {
+    method: 'post',
+    headers: HEADERS,
+    body: JSON.stringify(EMPTY_NET)
+  };
+
+  fetch('http://localhost:1234/v1/networks?collection=' + collectionName, q)
+    .then(response => { return response.json() })
+    .then(json => {
+      const dummySuid = json.networkSUID;
+      console.log('---------------');
+      console.log(dummySuid);
+      importAll(collectionName, ids, dummySuid);
+    });
+}
+
+
+function importAsCollections() {
+
 }
 
 function init() {
   const cyto = CyFramework.config([NDExValet, NDExStore]);
 
-  // Render NDEx Valet into the div
   cyto.render(NDExValet, document.getElementById('valet'), {
-      onLoad: function (networkIds) {
-        const q = getCyRestQuery('import', networkIds);
-        console.log("###Calling:");
-        console.log(q);
-        fetch(CYREST.IMPORT_NET, q);
-      }
-    }
-  );
+    onLoad: ids => { importAsOneCollection(ids); }
+  });
 
   var MESSAGES = {
     CONNECT: {
