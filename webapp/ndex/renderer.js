@@ -2,8 +2,8 @@ const remote = require('electron').remote;
 
 const CLOSE_BUTTON_ID = 'close';
 
-const CYREST_CALL = {
-  NETWORKS: 'http://localhost:1234/v1/networks' };
+const CYREST = {
+  IMPORT_NET: 'http://localhost:1234/v1/networks?format=cx&source=url' };
 
 
 const ID_COLUMN = {
@@ -66,10 +66,7 @@ function buildQuery(type) {
   return query;
 }
 
-
-
 function createNetworkList(idList) {
-
   let list = [];
 
   idList.map( id => {
@@ -81,7 +78,6 @@ function createNetworkList(idList) {
     };
     list.push(entry);
   });
-
   return list;
 }
 
@@ -98,16 +94,15 @@ function getCyRestQuery(query, ids) {
 }
 
 function init() {
-  // Create the framework instance
   const cyto = CyFramework.config([NDExValet, NDExStore]);
 
   // Render NDEx Valet into the div
   cyto.render(NDExValet, document.getElementById('valet'), {
       onLoad: function (networkIds) {
         const q = getCyRestQuery('import', networkIds);
-        console.log("Calling:");
+        console.log("###Calling:");
         console.log(q);
-        fetch(CYREST_CALL.NETWORKS, q);
+        fetch(CYREST.IMPORT_NET, q);
       }
     }
   );
