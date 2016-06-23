@@ -110,10 +110,12 @@ function applyLayout(results) {
 
 
 function importAsOneCollection(ids) {
-  const ct = new Date();
-  const ctStr = ct.getHours() + ':' + ct.getMinutes() + ':' + ct.getSeconds() +
+  let ct = new Date();
+  let ctStr = ct.getHours() + ':' + ct.getMinutes() + ':' + ct.getSeconds() +
     ' ' + ct.getFullYear() +'/' + (ct.getMonth() + 1) + '/' + ct.getDate();
-  const collectionName = 'From NDEx (' + ctStr + ')';
+  let collectionName = 'NDEx (' + ctStr + ')';
+
+  console.log('------------N = ' + collectionName);
 
   createDummy(collectionName, ids);
 }
@@ -131,7 +133,7 @@ function deleteDummy(dummy) {
     headers: HEADERS
   };
 
-  fetch('http://localhost:1234/v1/networks/' +dummy, q);
+  fetch('http://localhost:1234/v1/networks/' + dummy, q);
 
 }
 
