@@ -3,15 +3,18 @@ const LOGGER = require('winston');
 
 const APP_NAME_VALET = 'ndex';
 const APP_NAME_SAVE = 'ndex-save';
+const APP_NAME_LOGIN = 'ndex-login';
 
 const APP_CONFIG_VALET = require('./webapp/ndex/config');
 const APP_CONFIG_SAVE = require('./webapp/ndex-save/config');
+const APP_CONFIG_LOGIN = require('./webapp/ndex-login/config');
 
 console.log(APP_CONFIG_VALET);
 
 const APP_CONFIG_MAP = new Map();
 APP_CONFIG_MAP.set(APP_NAME_VALET, APP_CONFIG_VALET);
 APP_CONFIG_MAP.set(APP_NAME_SAVE, APP_CONFIG_SAVE);
+APP_CONFIG_MAP.set(APP_NAME_LOGIN, APP_CONFIG_LOGIN);
 
 // Required Electron components
 const { app, globalShortcut, BrowserWindow } = require('electron');
