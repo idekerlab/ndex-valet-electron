@@ -27,6 +27,7 @@ const WS_ADDRESS = 'ws://localhost:8025/ws/echo';
 
 let ws;
 let mainWindow;
+let opts;
 
 let block = false;
 let isDevEnabled = false;
@@ -61,6 +62,9 @@ function initWindow(appType) {
   LOGGER.log('debug', 'Target app = ' + appType);
 
   mainWindow = new BrowserWindow(APP_CONFIG_MAP.get(appType));
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.send('ping', opts);
+  });
 
   const dir = `${__dirname}`;
   mainWindow.loadURL('file://' + dir + '/webapp/' + appType + '/index.html');
@@ -139,9 +143,9 @@ function initSocket() {
           block = false;
           break;
         case "save":
-          let suid = msgObj.body;
-          LOGGER.log("debug", 'Got SUID: ' + suid);
-          mainWindow.setTitle('Save to NDEx: ' + suid);
+          opts = msgObj.options;
+          LOGGER.log("debug", 'Fire2: Got Save Params: ' + opts);
+          mainWindow.setTitle('Save to NDEx: ' + opts.name);
           break;
       }
     };

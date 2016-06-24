@@ -58,8 +58,8 @@ function connect(credential) {
   }
 
   // Add API addition
-  serverUrl = serverUrl + AUTH_API;
   credential.serverAddress = serverUrl;
+  serverUrl = serverUrl + AUTH_API;
 
   const q = {
     method: 'get',

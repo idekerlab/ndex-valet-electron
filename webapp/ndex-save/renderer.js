@@ -1,5 +1,24 @@
 const remote = require('electron').remote;
 
+const {ipcRenderer} = require('electron');
+
+
+const POST_CX = {
+  method: 'post',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+  body: {}
+};
+
+ipcRenderer.on('ping', (event, arg) => {
+  console.log('\n\n***************** Got IPC');
+  console.log(arg);
+  console.log(event);
+});
+
+
 function addCloseButton() {
   document.getElementById('close').addEventListener('click', () => {
     remote.getCurrentWindow().close();
@@ -8,12 +27,10 @@ function addCloseButton() {
 
 let cyto = CyFramework.config([NDExSave]);
 
-//TODO: We have to supply cxToSave and networkId here
 cyto.render(NDExSave, document.getElementById('save'), {
   //cxToSave is cx json as a string
   source: {},
   onSave: function (cx) {
-    //networkId is the network id of the network to be saved on ndex
     fetch(('public.ndexbio.org/rest/network/asCX' + networkId), {
       method: 'post',
       headers: {
