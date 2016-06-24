@@ -1,11 +1,22 @@
 const remote = require('electron').remote;
 const dialog = require('electron').remote.dialog;
+const WebSocket = require('ws');
 
 const win = remote.getCurrentWindow();
 
+const LOGIN = {
+  from: 'ndex',
+  type: 'login',
+  body: '',
+  options: {}
+};
+
 const cyto = CyFramework.config([NDExStore]);
 
-const DEF_SERVER = 'http://dev2.ndexbio.org/rest/user/authenticate';
+const DEF_SERVER = 'http://dev2.ndexbio.org/rest';
+const DEF_NAME = "Dev2";
+
+const AUTH_API = '/user/authenticate';
 
 const MSG_ERROR = {
   title: 'Error:',
@@ -36,6 +47,19 @@ cyto.render(NDExLogin, document.getElementById('valet'), {
 function connect(credential) {
   const id = credential.userName;
   const pw = credential.userPass;
+  let serverUrl = credential.serverAddress;
+
+  if(serverUrl === undefined || serverUrl === '') {
+    serverUrl = DEF_SERVER;
+  }
+
+  if(credential.serverName === undefined || credential.serverName === '') {
+    credential.serverName = DEF_NAME;
+  }
+
+  // Add API addition
+  serverUrl = serverUrl + AUTH_API;
+  credential.serverAddress = serverUrl;
 
   const q = {
     method: 'get',
@@ -46,7 +70,7 @@ function connect(credential) {
     }
   };
 
-  fetch(DEF_SERVER, q)
+  fetch(serverUrl, q)
     .then(response => {
       if (response.ok) {
         return response.json();
@@ -55,18 +79,25 @@ function connect(credential) {
       }
     })
     .then(json => {
-      console.log("Response from NDEx");
       console.log(json);
       const msg = MSG_SUCCESS;
       msg.message = msg.message + json.firstName;
       dialog.showMessageBox(win, msg, () => {
         sendMessage(credential);
-        win.close();
       });
     });
 }
 
-function sendMessage() {
-  // Open WS connection and send credential to Cytoscape.
 
+function sendMessage(credential) {
+  // Open WS connection and send credential to Cytoscape.
+  const ws = new WebSocket('ws://localhost:8025/ws/echo');
+
+  ws.onopen = function () {
+    const loginSuccess = LOGIN;
+    loginSuccess.options= credential;
+    ws.send(JSON.stringify(loginSuccess));
+    ws.close();
+    win.close();
+  };
 }
