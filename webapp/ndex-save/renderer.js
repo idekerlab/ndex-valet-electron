@@ -1,6 +1,7 @@
 const remote = require('electron').remote;
-
 const {ipcRenderer} = require('electron');
+
+let options;
 
 
 const POST_CX = {
@@ -16,6 +17,9 @@ ipcRenderer.on('ping', (event, arg) => {
   console.log('\n\n***************** Got IPC');
   console.log(arg);
   console.log(event);
+  options = arg;
+  console.log("Creating new entry==================");
+  postCollection();
 });
 
 
@@ -31,16 +35,70 @@ cyto.render(NDExSave, document.getElementById('save'), {
   //cxToSave is cx json as a string
   source: {},
   onSave: function (cx) {
-    fetch(('public.ndexbio.org/rest/network/asCX' + networkId), {
-      method: 'post',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(cx)
-    })
+    console.log("Creating new entry==================");
+    postCollection();
   }
 });
+
+
+function postCollection() {
+  const q = {
+    method: 'post',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: 'Basic ' + btoa(options.userName + ':' + options.userPass)
+    }
+  };
+
+  const url = options.serverAddress + '/network/asCX';
+
+  const cxUrl = 'http://localhost:1234/v1/collections/' + options.SUID;
+  console.log(cxUrl);
+
+  fetch(cxUrl, {
+    method: 'get',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  }).then(response=> {
+    return response.json();
+  }).then(cx => {
+
+    const boundary = 'blob';
+      console.log(cx);
+      // let cxStr = '--' + boundary + '--\r\n' + JSON.stringify(cx);
+      // cxStr = cxStr + '\r\n--' + boundary + '--\r\n';
+      //
+      // const req = new XMLHttpRequest();
+      // req.open("POST", url, true);
+      // req.setRequestHeader('Content-Type', 'multipart/form-data; boundary=blob');
+      // req.setRequestHeader('Authorization', 'Basic ' + btoa(options.userName + ':' + options.userPass));
+      // req.onload = function (e) {
+      //   if (this.status == 200) {
+      //     console.log(this.responseText);
+      //   }
+      // };
+      // req.send(cxStr);
+
+
+      fetch('http:localhost:5000/cx', {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache',
+          'NDEx-Server': options.serverAddress,
+          Authorization: 'Basic ' + btoa(options.userName + ':' + options.userPass)
+        },
+        body: JSON.stringify(cx)
+      });
+    }
+  ).then(response=> {
+    console.log(response);
+  });
+}
 
 function getNetwork() {
   fetch('http://localhost:1234/v1/networks?source=url&format=cx&collection=From NDEx', {
