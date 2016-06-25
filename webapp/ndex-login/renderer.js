@@ -11,12 +11,20 @@ const LOGIN = {
   options: {}
 };
 
+const DEF_SERVER = 'http://dev.ndexbio.org';
+const DEF_NAME = "Dev";
+
 const cyto = CyFramework.config([NDExStore]);
+const PRESET = {
+  userName: '',
+  userPass: '',
+  serverName: DEF_NAME,
+  serverAddress: DEF_SERVER,
+  loggedIn: false,
 
-const DEF_SERVER = 'http://dev2.ndexbio.org/rest';
-const DEF_NAME = "Dev2";
+}
 
-const AUTH_API = '/user/authenticate';
+const AUTH_API = '/rest/user/authenticate';
 
 const MSG_ERROR = {
   title: 'Error:',
@@ -33,7 +41,6 @@ const MSG_SUCCESS = {
   message: 'Welcome Back, ',
   detail: 'Status: Login Success'
 };
-
 
 cyto.render(NDExLogin, document.getElementById('valet'), {
   onSubmit: () => {

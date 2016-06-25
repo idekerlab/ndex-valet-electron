@@ -82,7 +82,7 @@ function createNetworkList(idList) {
   let list = [];
 
   idList.map(id => {
-    let source = 'http://dev2.ndexbio.org/rest/network/' + id.externalId + '/asCX';
+    let source = 'http://dev.ndexbio.org/rest/network/' + id.externalId + '/asCX';
     let entry = {
       source_location: source,
       source_method: 'GET',
@@ -148,15 +148,9 @@ function createDummy(collectionName, ids) {
     .then(response => { return response.json() })
     .then(json => {
       const dummySuid = json.networkSUID;
-      console.log('---------------');
       console.log(dummySuid);
       importAll(collectionName, ids, dummySuid);
     });
-}
-
-
-function importAsCollections() {
-
 }
 
 function init() {

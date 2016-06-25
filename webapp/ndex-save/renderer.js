@@ -66,24 +66,9 @@ function postCollection() {
     return response.json();
   }).then(cx => {
 
-    const boundary = 'blob';
       console.log(cx);
-      // let cxStr = '--' + boundary + '--\r\n' + JSON.stringify(cx);
-      // cxStr = cxStr + '\r\n--' + boundary + '--\r\n';
-      //
-      // const req = new XMLHttpRequest();
-      // req.open("POST", url, true);
-      // req.setRequestHeader('Content-Type', 'multipart/form-data; boundary=blob');
-      // req.setRequestHeader('Authorization', 'Basic ' + btoa(options.userName + ':' + options.userPass));
-      // req.onload = function (e) {
-      //   if (this.status == 200) {
-      //     console.log(this.responseText);
-      //   }
-      // };
-      // req.send(cxStr);
 
-
-      fetch('http:localhost:5000/cx', {
+      fetch('http://52.11.148.107:5000/cx', {
         method: 'post',
         headers: {
           'Content-Type': 'application/json',
