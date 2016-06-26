@@ -1,7 +1,12 @@
 const remote = require('electron').remote;
+const dialog = require('electron').remote.dialog;
+
 const {ipcRenderer} = require('electron');
 
 let options;
+
+// Main window
+const win = remote.getCurrentWindow();
 
 
 const POST_CX = {
@@ -13,13 +18,31 @@ const POST_CX = {
   body: {}
 };
 
+// For Dialogs
+
+const MSG_ERROR = {
+  title: 'Save Error:',
+  type: 'error',
+  buttons: ['Retry'],
+  message: 'Failed to login, ',
+  detail: 'Please check your inputs and try again.'
+};
+
+const MSG_SUCCESS = {
+  title: 'Save Success',
+  type: 'info',
+  buttons: ['OK'],
+  message: 'Network Collection Saved ',
+  detail: 'Successfully saved network collection to NDEx '
+};
+
 ipcRenderer.on('ping', (event, arg) => {
-  console.log('\n\n***************** Got IPC');
   console.log(arg);
   console.log(event);
   options = arg;
-  console.log("Creating new entry==================");
-  postCollection();
+
+  console.log('Options available:');
+  console.log(options);
 });
 
 
@@ -29,13 +52,12 @@ function addCloseButton() {
   });
 }
 
-let cyto = CyFramework.config([NDExSave]);
+const cyto = CyFramework.config([NDExStore, NDExSave]);
 
 cyto.render(NDExSave, document.getElementById('save'), {
   //cxToSave is cx json as a string
-  source: {},
   onSave: function (cx) {
-    console.log("Creating new entry==================");
+    console.log("New Creating new entry==================");
     postCollection();
   }
 });
@@ -66,41 +88,31 @@ function postCollection() {
     return response.json();
   }).then(cx => {
 
-      console.log(cx);
+    console.log(cx);
 
-      fetch('http://52.11.148.107:5000/cx', {
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache',
-          'NDEx-Server': options.serverAddress,
-          Authorization: 'Basic ' + btoa(options.userName + ':' + options.userPass)
-        },
-        body: JSON.stringify(cx)
+    fetch('http://52.11.148.107:5000/cx', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
+        'NDEx-Server': options.serverAddress,
+        Authorization: 'Basic ' + btoa(options.userName + ':' + options.userPass)
+      },
+      body: JSON.stringify(cx)
+    }).then(response => {
+      return response.json();
+    }).then(json => {
+      console.log(json);
+      const msg = MSG_SUCCESS;
+      msg.message = msg.message + json.firstName;
+      dialog.showMessageBox(win, msg, () => {
+        console.log("** Success!");
+        win.close();
+
       });
-    }
-  ).then(response=> {
-    console.log(response);
+    });
   });
-}
-
-function getNetwork() {
-  fetch('http://localhost:1234/v1/networks?source=url&format=cx&collection=From NDEx', {
-    method: 'post',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(["http://dev2.ndexbio.org/rest/network/" + N.externalId + "/asCX"])
-  }).then(function (response) {
-    return response.json();
-  }).then(function (result) {
-    var suid = result[0]['networkSUID'];
-    console.log('SUID: ' + suid);
-    fetch('http://localhost:1234/v1/apply/layouts/force-directed/' + suid)
-  });
-
 }
 
 addCloseButton();
