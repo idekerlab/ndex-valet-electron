@@ -1,5 +1,6 @@
 const remote = require('electron').remote;
 const {Map} = require('immutable');
+const {ipcRenderer} = require('electron');
 
 const WS_SERVER = 'ws://localhost:8025/ws/echo';
 
@@ -20,12 +21,28 @@ const DEF_DEV_SERVER = 'http://dev2.ndexbio.org';
 const DEF_PUBLIC_NAME = 'NDEx Public';
 const DEF_PUBLIC_SERVER = 'http://public.ndexbio.org';
 
-const defaultState = Map({
+let defaultState = Map({
   serverName: DEF_DEV_NAME,
   serverAddress: DEF_DEV_SERVER,
   userName: "",
   userPass: "",
   loggedIn: false
+});
+
+// Get options from main process
+ipcRenderer.on('ping', (event, arg) => {
+  console.log(arg);
+  console.log(event);
+  loginInfo = arg;
+  console.log('Login Options available:');
+  console.log(loginInfo);
+
+  if(loginInfo === undefined || loginInfo === null || loginInfo === {}) {
+  } else {
+    defaultState = Map(loginInfo);
+  }
+
+  startApp();
 });
 
 // Name of the redux store
@@ -64,8 +81,12 @@ const EMPTY_NET = {
   }
 };
 
-// CytoFramework obj.
+
 let cyto;
+
+function startApp() {
+  addCloseButton();
+}
 
 function addCloseButton() {
   document.getElementById(CLOSE_BUTTON_ID)
@@ -86,10 +107,7 @@ function buildQuery(type) {
     {
       const createCol = {
         method: 'post',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        },
+        headers: HEADERS,
         body: JSON.stringify([ID_COLUMN])
       };
       query = createCol;
@@ -99,10 +117,7 @@ function buildQuery(type) {
     {
       const updateTable = {
         method: 'put',
-        headers: {
-          "Accept": 'application/json',
-          "Content-Type": 'application/json'
-        },
+        headers: HEADERS,
         body: []
       };
       query = updateTable;
@@ -252,5 +267,3 @@ function updateWindowProps(server) {
     .setTitle('Connected: ' + server.serverName + ' ( ' + server.serverAddress + ' )');
 }
 
-// Start application
-addCloseButton();
