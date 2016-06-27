@@ -1,8 +1,39 @@
 const remote = require('electron').remote;
 const dialog = require('electron').remote.dialog;
 const WebSocket = require('ws');
+const {ipcRenderer} = require('electron');
+
+const WS_SERVER = 'ws://localhost:8025/ws/echo';
 
 const win = remote.getCurrentWindow();
+
+const DEF_SERVER = 'http://dev2.ndexbio.org';
+const DEF_NAME = "NDEx Dev 2";
+
+const DEFAULTS = {
+  userName: '',
+  userPass: '',
+  serverName: DEF_NAME,
+  serverAddress: DEF_SERVER,
+  loggedIn: false
+};
+
+
+// Get options from main process
+ipcRenderer.on('ping', (event, arg) => {
+  console.log(arg);
+  console.log(event);
+  loginInfo = arg;
+  console.log('Loign Options available:');
+  console.log(loginInfo);
+
+  if(loginInfo === undefined || loginInfo === null || loginInfo === {}) {
+    loginInfo = DEFAULTS;
+  }
+
+  // Login is ready.  Init opts
+  init(loginInfo);
+});
 
 const LOGIN = {
   from: 'ndex',
@@ -10,19 +41,6 @@ const LOGIN = {
   body: '',
   options: {}
 };
-
-const DEF_SERVER = 'http://dev.ndexbio.org';
-const DEF_NAME = "Dev";
-
-const cyto = CyFramework.config([NDExStore]);
-const PRESET = {
-  userName: '',
-  userPass: '',
-  serverName: DEF_NAME,
-  serverAddress: DEF_SERVER,
-  loggedIn: false,
-
-}
 
 const AUTH_API = '/rest/user/authenticate';
 
@@ -42,13 +60,22 @@ const MSG_SUCCESS = {
   detail: 'Status: Login Success'
 };
 
-cyto.render(NDExLogin, document.getElementById('valet'), {
-  onSubmit: () => {
-    const state = cyto.getStore('ndex').server.toJS();
-    console.log(state);
-    connect(state);
-  }
-});
+
+
+function init(loginInfo) {
+  const cyto = CyFramework.config([NDExStore]);
+
+  cyto.render(NDExLogin, document.getElementById('valet'), {
+    defaults: loginInfo,
+
+    onSubmit: () => {
+      const state = cyto.getStore('ndex').server.toJS();
+      console.log(state);
+      connect(state);
+    }
+  });
+
+}
 
 
 function connect(credential) {
@@ -56,11 +83,11 @@ function connect(credential) {
   const pw = credential.userPass;
   let serverUrl = credential.serverAddress;
 
-  if(serverUrl === undefined || serverUrl === '') {
+  if (serverUrl === undefined || serverUrl === '') {
     serverUrl = DEF_SERVER;
   }
 
-  if(credential.serverName === undefined || credential.serverName === '') {
+  if (credential.serverName === undefined || credential.serverName === '') {
     credential.serverName = DEF_NAME;
   }
 
@@ -98,11 +125,11 @@ function connect(credential) {
 
 function sendMessage(credential) {
   // Open WS connection and send credential to Cytoscape.
-  const ws = new WebSocket('ws://localhost:8025/ws/echo');
+  const ws = new WebSocket(WS_SERVER);
 
-  ws.onopen = function () {
+  ws.onopen = () => {
     const loginSuccess = LOGIN;
-    loginSuccess.options= credential;
+    loginSuccess.options = credential;
     ws.send(JSON.stringify(loginSuccess));
     ws.close();
     win.close();

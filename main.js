@@ -112,7 +112,10 @@ function initSocket() {
 
       switch (msgObj.type) {
         case 'app':
-          console.log(msgObj);
+          LOGGER.log("debug", "APP Signal:  ==================");
+          LOGGER.log("debug", msgObj);
+          opts = msgObj.options;
+
           initWindow(msgObj.body);
           break;
         case "focus-success":

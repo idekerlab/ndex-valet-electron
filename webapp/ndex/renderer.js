@@ -1,4 +1,7 @@
 const remote = require('electron').remote;
+const {Map} = require('immutable');
+
+const WS_SERVER = 'ws://localhost:8025/ws/echo';
 
 const CLOSE_BUTTON_ID = 'close';
 
@@ -11,6 +14,40 @@ const CYREST = {
   IMPORT_NET: 'http://localhost:1234/v1/networks?format=cx&source=url'
 };
 
+const DEF_DEV_NAME = 'NDEx Dev 2';
+const DEF_DEV_SERVER = 'http://dev2.ndexbio.org';
+
+const DEF_PUBLIC_NAME = 'NDEx Public';
+const DEF_PUBLIC_SERVER = 'http://public.ndexbio.org';
+
+const defaultState = Map({
+  serverName: DEF_DEV_NAME,
+  serverAddress: DEF_DEV_SERVER,
+  userName: "",
+  userPass: "",
+  loggedIn: false
+});
+
+// Name of the redux store
+const STORE_NDEX = 'ndex';
+
+const MESSAGES = {
+  CONNECT: {
+    from: 'ndex',
+    type: 'connected',
+    body: ''
+  },
+
+  ALIVE: {
+    from: 'ndex',
+    type: 'alive',
+    body: 'from renderer'
+  }
+};
+
+var MESSAGE_TYPE = {
+  QUERY: 'query'
+};
 
 const ID_COLUMN = {
   name: 'NDEX_UUID',
@@ -26,6 +63,9 @@ const EMPTY_NET = {
     edges: []
   }
 };
+
+// CytoFramework obj.
+let cyto;
 
 function addCloseButton() {
   document.getElementById(CLOSE_BUTTON_ID)
@@ -81,8 +121,12 @@ function buildQuery(type) {
 function createNetworkList(idList) {
   let list = [];
 
+  const store = cyto.getStore(STORE_NDEX);
+  const server = store.server.toJS();
+  console.log(server);
+
   idList.map(id => {
-    let source = 'http://dev.ndexbio.org/rest/network/' + id.externalId + '/asCX';
+    let source = server.serverAddress + '/rest/network/' + id.externalId + '/asCX';
     let entry = {
       source_location: source,
       source_method: 'GET',
@@ -114,8 +158,6 @@ function importAsOneCollection(ids) {
   let ctStr = ct.getHours() + ':' + ct.getMinutes() + ':' + ct.getSeconds() +
     ' ' + ct.getFullYear() +'/' + (ct.getMonth() + 1) + '/' + ct.getDate();
   let collectionName = 'NDEx (' + ctStr + ')';
-
-  console.log('------------N = ' + collectionName);
 
   createDummy(collectionName, ids);
 }
@@ -154,60 +196,61 @@ function createDummy(collectionName, ids) {
 }
 
 function init() {
-  const cyto = CyFramework.config([NDExValet, NDExStore]);
+  initCyComponent(defaultState);
+  updateWindowProps(cyto.getStore(STORE_NDEX).server.toJS());
+  initWsConnection();
+}
 
-  cyto.render(NDExValet, document.getElementById('valet'), {
-    onLoad: ids => { importAsOneCollection(ids); }
-  });
+function initWsConnection() {
+  cySocket = new WebSocket(WS_SERVER);
 
-  var MESSAGES = {
-    CONNECT: {
-      from: 'ndex',
-      type: 'connected',
-      body: ''
-    },
-
-    ALIVE: {
-      from: 'ndex',
-      type: 'alive',
-      body: 'from renderer'
-    }
-  };
-
-  var MESSAGE_TYPE = {
-    QUERY: 'query'
-  };
-
-  //Connect to Cytoscape with a web socket
-  cySocket = new WebSocket('ws://localhost:8025/ws/echo');
-
-  cySocket.onopen = function () {
+  cySocket.onopen = () => {
     cySocket.send(JSON.stringify(MESSAGES.CONNECT));
   };
 
-  //Listen for messages
-  cySocket.onmessage = function (event) {
-    var msg = JSON.parse(event.data);
-
+  cySocket.onmessage = event => {
+    const msg = JSON.parse(event.data);
     if (msg.from !== 'cy3') {
       return;
     }
 
     switch (msg.type) {
-      case MESSAGE_TYPE.QUERY:
-        let query = msg.body;
-        console.log('New query from Cy3: ' + query);
+      case MESSAGE_TYPE.QUERY: {
+        const query = msg.body;
         cyto.dispatch(NDExValet.fieldActions.updateQuery(query));
-        cyto.dispatch(NDExStore.luceneActions.searchFor(query));
+        const store = cyto.getStore(STORE_NDEX);
+        const server = store.server.toJS();
+        cyto.dispatch(NDExStore.luceneActions.searchFor(server, query));
         break;
+      }
+      default: {
+        break;
+      }
     }
-  }
+  };
 
   // Keep alive by sending notification...
   setInterval(function () {
     cySocket.send(JSON.stringify(MESSAGES.ALIVE));
   }, 120000);
+
 }
 
+function initCyComponent(serverState) {
+  cyto = CyFramework.config([NDExValet, NDExStore], {
+    ndex: {
+      server: serverState
+    }
+  });
+  cyto.render(NDExValet, document.getElementById('valet'), {
+    onLoad: ids => { importAsOneCollection(ids); }
+  });
+}
 
+function updateWindowProps(server) {
+  remote.getCurrentWindow()
+    .setTitle('Connected: ' + server.serverName + ' ( ' + server.serverAddress + ' )');
+}
+
+// Start application
 addCloseButton();
