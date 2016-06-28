@@ -6,6 +6,10 @@ let options;
 
 const win = remote.getCurrentWindow();
 
+const HEADERS = {
+  'Accept': 'application/json',
+  'Content-Type': 'application/json'
+};
 
 const MSG_ERROR = {
   title: 'Save Error:',
@@ -24,15 +28,16 @@ const MSG_SUCCESS = {
 };
 
 
-ipcRenderer.on('ping', (event, arg) => {
-  console.log(arg);
-  console.log(event);
-  options = arg;
+function init() {
+  const cyto = CyFramework.config([NDExStore, NDExSave]);
 
-  console.log('Options available:');
-  console.log(options);
-});
-
+  cyto.render(NDExSave, document.getElementById('save'), {
+    onSave: function (cx) {
+      console.log("New Creating new entry==================");
+      postCollection();
+    }
+  });
+}
 
 function addCloseButton() {
   document.getElementById('close').addEventListener('click', () => {
@@ -40,78 +45,93 @@ function addCloseButton() {
   });
 }
 
-const cyto = CyFramework.config([NDExStore, NDExSave]);
+function startApp() {
+  addCloseButton();
+  init();
+}
 
-cyto.render(NDExSave, document.getElementById('save'), {
-  //cxToSave is cx json as a string
-  onSave: function (cx) {
-    console.log("New Creating new entry==================");
-    postCollection();
-  }
+ipcRenderer.on('ping', (event, arg) => {
+  console.log(arg);
+  console.log(event);
+  options = arg;
+
+  console.log('Options available:');
+  console.log(options);
+
+  startApp();
 });
 
+function postCx(rawCX) {
+  const ndexServerAddress = options.serverAddress;
+  const id = options.userName;
+  const pass = options.userPass;
 
-function postCollection() {
+  const url = ndexServerAddress + '/rest/network/asCX';
+  const XHR = new XMLHttpRequest();
+  const FD = new FormData();
+  const content = JSON.stringify(rawCX);
+  const blob = new Blob([content], {type: 'application/octet-stream'});
 
-  const cxUrl = 'http://localhost:1234/v1/collections/' + options.SUID;
+  FD.append('CXNetworkStream', blob);
 
-  fetch(cxUrl, {
-    method: 'get',
+  XHR.addEventListener('load', evt => {
+    const newNdexId = evt.target.response;
+    console.log(newNdexId);
+    saveSuccess(newNdexId);
+  });
+
+  XHR.addEventListener('error', evt => {
+    console.log(evt);
+    saveFailed(evt);
+  });
+
+  XHR.open('POST', url);
+
+  const auth = 'Basic ' + btoa(id + ':' + pass);
+  XHR.setRequestHeader('Authorization', auth);
+  XHR.send(FD);
+}
+
+function saveSuccess(ndexId) {
+  const updateUrl = options.serverAddress + '/rest/network/' + ndexId + '/summary';
+  const param = {
+    method: 'post',
     headers: {
+      'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-  }).then(response=> {
-    return response.json();
-  }).then(cx => {
-    console.log(cx);
+      Authorization: 'Basic ' + btoa(options.userName + ':' + options.userPass)
+    },
+    body: JSON.stringify({ visibility: 'PUBLIC' })
+  };
 
-    fetch('http://52.11.148.107:5000/cx', {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Cache-Control': 'no-cache',
-        'NDEx-Server': options.serverAddress,
-        Authorization: 'Basic ' + btoa(options.userName + ':' + options.userPass)
-      },
-      body: JSON.stringify(cx)
-    }).then(response => {
+  fetch(updateUrl, param)
+    .then(response => {
       if (response.ok) {
-        return response.json();
-      } else {
-        dialog.showMessageBox(win, MSG_ERROR, () => {
-          console.log("** Failed to load!");
+        dialog.showMessageBox(win, MSG_SUCCESS, () => {
+          console.log('New Ndex ID: ' + ndexId);
           win.close();
-          return;
         });
+      } else {
+        saveFailed(response);
       }
-    }).then(json => {
-      console.log(json);
-      const msg = MSG_SUCCESS;
-      console.log("---------- Save Success -------------");
-      const uuid = json;
-      fetch(options.serverAddress + '/rest/network/' + uuid + '/summary', {
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          Authorization: 'Basic ' + btoa(options.userName + ':' + options.userPass)
-        },
-        body: JSON.stringify({ visibility: 'PUBLIC' })
-      })
-        .then(response => {
-          console.log("---------- Got success -------------");
-          console.log(response);
-        });
-
-      dialog.showMessageBox(win, msg, () => {
-        console.log("** Success!");
-        win.close();
-      });
     });
+}
+
+function saveFailed(evt) {
+  dialog.showMessageBox(win, MSG_ERROR, () => {
+    console.log(evt);
+    win.close();
   });
 }
 
-addCloseButton();
-
+function postCollection() {
+  const cxUrl = 'http://localhost:1234/v1/collections/' + options.SUID;
+  fetch(cxUrl, {
+    method: 'get',
+    headers: HEADERS,
+  }).then(response=> {
+    return response.json();
+  }).then(cx => {
+    postCx(cx);
+  });
+}
