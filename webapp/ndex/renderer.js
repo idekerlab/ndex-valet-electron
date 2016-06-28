@@ -26,7 +26,7 @@ let defaultState = Map({
   serverAddress: DEF_DEV_SERVER,
   userName: "",
   userPass: "",
-  loggedIn: true
+  loggedIn: false
 });
 
 // Get options from main process
@@ -42,7 +42,7 @@ ipcRenderer.on('ping', (event, arg) => {
     loginInfo['loggedIn'] = true;
     defaultState = Map(loginInfo);
   }
-  
+
   startApp();
 });
 
@@ -100,39 +100,6 @@ function addCloseButton() {
 
 let cySocket;
 
-function buildQuery(type) {
-  let query = {};
-
-  switch (type) {
-    case 'column':
-    {
-      const createCol = {
-        method: 'post',
-        headers: HEADERS,
-        body: JSON.stringify([ID_COLUMN])
-      };
-      query = createCol;
-      break;
-    }
-    case 'uuid':
-    {
-      const updateTable = {
-        method: 'put',
-        headers: HEADERS,
-        body: []
-      };
-      query = updateTable;
-
-      break;
-    }
-    default:
-    {
-      break;
-    }
-  }
-
-  return query;
-}
 
 function createNetworkList(idList) {
   let list = [];
@@ -142,11 +109,11 @@ function createNetworkList(idList) {
   console.log(server);
 
   idList.map(id => {
-    let source = server.serverAddress + '/rest/network/' + id.externalId + '/asCX';
+    let source = server.serverAddress + '/rest/network/' + id + '/asCX';
     let entry = {
       source_location: source,
       source_method: 'GET',
-      ndex_uuid: id.externalId
+      ndex_uuid: id
     };
     list.push(entry);
   });
@@ -169,13 +136,68 @@ function applyLayout(results) {
 }
 
 
-function importAsOneCollection(ids) {
-  let ct = new Date();
-  let ctStr = ct.getHours() + ':' + ct.getMinutes() + ':' + ct.getSeconds() +
-    ' ' + ct.getFullYear() +'/' + (ct.getMonth() + 1) + '/' + ct.getDate();
-  let collectionName = 'NDEx (' + ctStr + ')';
+// Use first entry as its collection name
+function getNetworkSummary(id) {
 
-  createDummy(collectionName, ids);
+  const url = defaultState.toJS().serverAddress + '/rest/network/' + id.externalId;
+
+  const param = {
+    method: 'get',
+    headers: HEADERS
+  };
+  console.log("# fetch called: " + id.externalId);
+  return fetch(url, param);
+}
+
+function getSummaries(ids) {
+  return Promise.all(ids.map(getNetworkSummary));
+}
+
+
+function getSubnetworkCount(net) {
+  const subnets = new Set();
+  const netProps = net.properties;
+  netProps.map(prop => {
+    const subnetId = prop.subNetworkId;
+    if (subnetId != null && subnetId != undefined) {
+      subnets.add(subnetId);
+    }
+  });
+
+  return subnets.size;
+}
+
+function importAsOneCollection(ids) {
+  let singleCollectionName = null;
+  const collections = {};
+  const singles = [];
+
+  getSummaries(ids)
+    .then(responses => {
+      return Promise.all(responses.map(rsp =>{return rsp.json();}));
+    })
+    .then(res => {
+      res.map(net => {
+        const count = getSubnetworkCount(net);
+        if(count !== 0) {
+          // Multiple networks
+          collections[net.name] = [net.externalId];
+        } else {
+          if(singleCollectionName === null) {
+            singleCollectionName = net.name;
+          }
+          singles.push(net.externalId);
+        }
+      });
+    })
+    .then(() => {
+      collections[singleCollectionName] = singles;
+      const keys = Object.keys(collections);
+      console.log(keys);
+      keys.map(key => {
+        createDummy(key, collections[key]);
+      });
+    });
 }
 
 function importAll(collectionName, ids, dummy) {
