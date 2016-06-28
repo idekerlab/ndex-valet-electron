@@ -26,7 +26,7 @@ let defaultState = Map({
   serverAddress: DEF_DEV_SERVER,
   userName: "",
   userPass: "",
-  loggedIn: false
+  loggedIn: true
 });
 
 // Get options from main process
@@ -39,9 +39,10 @@ ipcRenderer.on('ping', (event, arg) => {
 
   if(loginInfo === undefined || loginInfo === null || loginInfo === {}) {
   } else {
+    loginInfo['loggedIn'] = true;
     defaultState = Map(loginInfo);
   }
-
+  
   startApp();
 });
 

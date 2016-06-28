@@ -1,31 +1,18 @@
 const remote = require('electron').remote;
 const dialog = require('electron').remote.dialog;
-
 const {ipcRenderer} = require('electron');
 
 let options;
 
-// Main window
 const win = remote.getCurrentWindow();
 
-
-const POST_CX = {
-  method: 'post',
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  },
-  body: {}
-};
-
-// For Dialogs
 
 const MSG_ERROR = {
   title: 'Save Error:',
   type: 'error',
-  buttons: ['Retry'],
-  message: 'Failed to login, ',
-  detail: 'Please check your inputs and try again.'
+  buttons: ['Close'],
+  message: 'Saving Failed, ',
+  detail: 'Failed.'
 };
 
 const MSG_SUCCESS = {
@@ -35,6 +22,7 @@ const MSG_SUCCESS = {
   message: 'Network Collection Saved ',
   detail: 'Successfully saved network collection to NDEx '
 };
+
 
 ipcRenderer.on('ping', (event, arg) => {
   console.log(arg);
@@ -64,19 +52,8 @@ cyto.render(NDExSave, document.getElementById('save'), {
 
 
 function postCollection() {
-  const q = {
-    method: 'post',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: 'Basic ' + btoa(options.userName + ':' + options.userPass)
-    }
-  };
-
-  const url = options.serverAddress + '/network/asCX';
 
   const cxUrl = 'http://localhost:1234/v1/collections/' + options.SUID;
-  console.log(cxUrl);
 
   fetch(cxUrl, {
     method: 'get',
@@ -87,7 +64,6 @@ function postCollection() {
   }).then(response=> {
     return response.json();
   }).then(cx => {
-
     console.log(cx);
 
     fetch('http://52.11.148.107:5000/cx', {
@@ -101,15 +77,37 @@ function postCollection() {
       },
       body: JSON.stringify(cx)
     }).then(response => {
-      return response.json();
+      if (response.ok) {
+        return response.json();
+      } else {
+        dialog.showMessageBox(win, MSG_ERROR, () => {
+          console.log("** Failed to load!");
+          win.close();
+          return;
+        });
+      }
     }).then(json => {
       console.log(json);
       const msg = MSG_SUCCESS;
-      msg.message = msg.message + json.firstName;
+      console.log("---------- Save Success -------------");
+      const uuid = json;
+      fetch(options.serverAddress + '/rest/network/' + uuid + '/summary', {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          Authorization: 'Basic ' + btoa(options.userName + ':' + options.userPass)
+        },
+        body: JSON.stringify({ visibility: 'PUBLIC' })
+      })
+        .then(response => {
+          console.log("---------- Got success -------------");
+          console.log(response);
+        });
+
       dialog.showMessageBox(win, msg, () => {
         console.log("** Success!");
         win.close();
-
       });
     });
   });
