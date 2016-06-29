@@ -4,8 +4,7 @@ const {ipcRenderer} = require('electron');
 
 const jsonfile = require('jsonfile');
 
-
-
+// For saving to local directory
 function storeFile(cx, fileName) {
   const file = tempDir + fileName;
   // const file = '/Users/kono/' + fileName;
@@ -376,6 +375,19 @@ function initCyComponent(serverState) {
     }
   });
   cyto.render(NDExValet, document.getElementById('valet'), {
+    theme: {
+      palette: {
+        primary1Color: '#6E93B6',
+        primary2Color: '#244060',
+        primary3Color: '##EDEDED',
+        accent1Color: '#D69121',
+        accent2Color: '#E4E4E4',
+        accent3Color: '##9695A6'
+      }
+    },
+    style: {
+      backgroundColor: '#EDEDED'
+    },
     onLoad: ids => { importAsOneCollection(ids); }
   });
 }

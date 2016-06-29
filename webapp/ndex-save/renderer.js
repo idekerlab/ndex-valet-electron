@@ -2,9 +2,23 @@ const remote = require('electron').remote;
 const dialog = require('electron').remote.dialog;
 const {ipcRenderer} = require('electron');
 
-let options;
-
+// Main browser window
 const win = remote.getCurrentWindow();
+
+const THEME = {
+  palette: {
+    primary1Color: '#6E93B6',
+      primary2Color: '#244060',
+      primary3Color: '##EDEDED',
+      accent1Color: '#D69121',
+      accent2Color: '#E4E4E4',
+      accent3Color: '##9695A6'
+  }
+};
+
+const STYLE = {
+  backgroundColor: '#EDEDED'
+};
 
 const HEADERS = {
   'Accept': 'application/json',
@@ -27,14 +41,53 @@ const MSG_SUCCESS = {
   detail: 'Successfully saved network collection to NDEx '
 };
 
+// Default parameters (credentials for the application)
+let options;
+
+function getTable() {
+
+  const suid = options.SUID;
+  console.log(options);
+
+  const params = {
+    method: 'get',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+
+  const url = 'http://localhost:1234/v1/collections/' + suid + '/tables/default';
+
+  fetch(url, params)
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      } else {
+      }
+    })
+    .then(json => {
+      console.log("got table");
+      console.log(json);
+    });
+}
 
 function init() {
+  getTable();
   const cyto = CyFramework.config([NDExStore, NDExSave]);
 
   cyto.render(NDExSave, document.getElementById('save'), {
-    onSave: function (cx) {
-      console.log("New Creating new entry==================");
-      postCollection();
+    theme: THEME,
+    style: STYLE,
+
+    properties: {
+      'CyCatagory:Sample_1:field_1': 'AAAAAAAAAA'
+    },
+
+    onSave(newProps, isPublic) {
+      console.log("@ SAVING...");
+      console.log(newProps);
+      console.log(isPublic);
+      // postCollection();
     }
   });
 }
@@ -50,16 +103,6 @@ function startApp() {
   init();
 }
 
-ipcRenderer.on('ping', (event, arg) => {
-  console.log(arg);
-  console.log(event);
-  options = arg;
-
-  console.log('Options available:');
-  console.log(options);
-
-  startApp();
-});
 
 function postCx(rawCX) {
   const ndexServerAddress = options.serverAddress;
@@ -135,3 +178,15 @@ function postCollection() {
     postCx(cx);
   });
 }
+
+
+// Start the application whenever the required parameters are ready.
+ipcRenderer.on('ping', (event, arg) => {
+  console.log(arg);
+  console.log(event);
+  options = arg;
+  console.log('Options available:');
+  console.log(options);
+
+  startApp();
+});
