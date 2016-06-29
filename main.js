@@ -19,6 +19,10 @@ APP_CONFIG_MAP.set(APP_NAME_LOGIN, APP_CONFIG_LOGIN);
 // Required Electron components
 const { app, globalShortcut, BrowserWindow } = require('electron');
 
+global.sharedObj = { temp: app.getPath('temp') };
+console.log('==========temp');
+console.log(global.sharedObj);
+
 // For duplex communication
 const WebSocket = require('ws');
 
@@ -115,6 +119,10 @@ function initSocket() {
           LOGGER.log("debug", "APP Signal:  ==================");
           LOGGER.log("debug", msgObj);
           opts = msgObj.options;
+          // const tmpPath = app.getPath('temp');
+          // console.log('==========temp');
+          // console.log(tmpPath);
+          // opts['tempPath'] = tmpPath;
 
           initWindow(msgObj.body);
           break;

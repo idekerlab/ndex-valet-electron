@@ -30,6 +30,7 @@
     "eslint-plugin-import": "^1.9.2",
     "eslint-plugin-jsx-a11y": "^1.5.3",
     "immutable": "^3.8.1",
+    "jsonfile": "^2.3.1",
     "winston": "^2.2.0",
     "ws": "^1.1.0"
   }

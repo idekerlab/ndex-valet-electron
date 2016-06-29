@@ -2,6 +2,24 @@ const remote = require('electron').remote;
 const {Map} = require('immutable');
 const {ipcRenderer} = require('electron');
 
+const jsonfile = require('jsonfile');
+
+
+
+function storeFile(cx, fileName) {
+  const file = tempDir + fileName;
+  // const file = '/Users/kono/' + fileName;
+
+  jsonfile.writeFile(file, cx, err => {
+    if (err != null || err != undefined) {
+      console.error(err);
+    } else {
+      // OK
+    }
+  });
+}
+
+
 const WS_SERVER = 'ws://localhost:8025/ws/echo';
 
 const CLOSE_BUTTON_ID = 'close';
@@ -29,6 +47,9 @@ let defaultState = Map({
   loggedIn: false
 });
 
+let tempDir;
+
+
 // Get options from main process
 ipcRenderer.on('ping', (event, arg) => {
   console.log(arg);
@@ -36,6 +57,9 @@ ipcRenderer.on('ping', (event, arg) => {
   loginInfo = arg;
   console.log('Login Options available:');
   console.log(loginInfo);
+
+  const gl = remote.getGlobal('sharedObj');
+  tempDir = gl.temp;
 
   if(loginInfo === undefined || loginInfo === null || loginInfo === {}) {
   } else {
@@ -101,15 +125,26 @@ function addCloseButton() {
 let cySocket;
 
 
-function createNetworkList(idList) {
+function createNetworkList(idList, isPublic) {
   let list = [];
 
   const store = cyto.getStore(STORE_NDEX);
   const server = store.server.toJS();
-  console.log(server);
 
   idList.map(id => {
-    let source = server.serverAddress + '/rest/network/' + id + '/asCX';
+
+    let source = null;
+    if(isPublic) {
+      source = server.serverAddress + '/rest/network/' + id + '/asCX';
+    } else {
+      // Private
+      source = 'file://' + tempDir + id + '.json';
+      console.log(source);
+    }
+
+    console.log('============= Creating entry');
+    console.log(source);
+
     let entry = {
       source_location: source,
       source_method: 'GET',
@@ -120,17 +155,19 @@ function createNetworkList(idList) {
   return list;
 }
 
-function getImportQuery(ids) {
+function getImportQuery(ids, isPublic) {
   return {
     method: 'post',
     headers: HEADERS,
-    body: JSON.stringify(createNetworkList(ids))
+    body: JSON.stringify(createNetworkList(ids, isPublic))
   };
 }
 
 function applyLayout(results) {
   results.map(result => {
     const suid = result.networkSUID;
+    console.log("LAYOUT: " + suid);
+    console.log(typeof suid);
     fetch('http://localhost:1234/v1/apply/layouts/force-directed/' + suid);
   });
 }
@@ -138,12 +175,16 @@ function applyLayout(results) {
 
 // Use first entry as its collection name
 function getNetworkSummary(id) {
-
-  const url = defaultState.toJS().serverAddress + '/rest/network/' + id.externalId;
+  const credentials = defaultState.toJS();
+  const url = credentials.serverAddress + '/rest/network/' + id.externalId;
 
   const param = {
     method: 'get',
-    headers: HEADERS
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: 'Basic ' + btoa(credentials.userName + ':' + credentials.userPass)
+    }
   };
   console.log("# fetch called: " + id.externalId);
   return fetch(url, param);
@@ -172,12 +213,19 @@ function importAsOneCollection(ids) {
   const collections = {};
   const singles = [];
 
+  const privateNetworks = new Set();
+
   getSummaries(ids)
     .then(responses => {
       return Promise.all(responses.map(rsp =>{return rsp.json();}));
     })
     .then(res => {
       res.map(net => {
+        // Check private or not
+        if(net.visibility === 'PRIVATE') {
+          privateNetworks.add(net.externalId);
+        }
+
         const count = getSubnetworkCount(net);
         if(count !== 0) {
           // Multiple networks
@@ -191,21 +239,68 @@ function importAsOneCollection(ids) {
       });
     })
     .then(() => {
+      // Save all
+      return Promise.all(ids.map(id => {
+        if(privateNetworks.has(id.externalId)) {
+          fetchNetwork(id.externalId);
+        }
+      }));
+    })
+    .then(() => {
       collections[singleCollectionName] = singles;
       const keys = Object.keys(collections);
       console.log(keys);
       keys.map(key => {
-        createDummy(key, collections[key]);
+        createDummy(key, collections[key], privateNetworks);
       });
     });
 }
 
-function importAll(collectionName, ids, dummy) {
-  fetch(CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(ids))
+function fetchNetwork(uuid) {
+
+  const credentials = defaultState.toJS();
+
+  const param = {
+    method: 'get',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: 'Basic ' + btoa(credentials.userName + ':' + credentials.userPass)
+    }
+  };
+
+  const address = credentials.serverAddress;
+  const url = address + '/rest/network/' + uuid + '/asCX';
+  fetch(url, param)
+    .then(response => { return response.json(); })
+    .then(json => {
+      storeFile(json, uuid + '.json');
+    });
+}
+
+function importAll(collectionName, ids, dummy, privateNetworks) {
+
+  const publicNets = [];
+  const privateNets = [];
+
+  ids.map(id => {
+    if (privateNetworks.has(id)) {
+      privateNets.push(id);
+    } else {
+      console.log("$$$ Public");
+      publicNets.push(id);
+    }
+  });
+
+  fetch(CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(publicNets, true))
     .then(response => { return response.json(); })
     .then(json => { applyLayout(json); })
-    .then(() => deleteDummy(dummy));
+    .then(() => {
+      fetch(CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(privateNets, false))
+        .then(() => deleteDummy(dummy));
+    });
 }
+
 
 function deleteDummy(dummy) {
   const q =  {
@@ -217,7 +312,7 @@ function deleteDummy(dummy) {
 
 }
 
-function createDummy(collectionName, ids) {
+function createDummy(collectionName, ids, privateNetworks) {
   const q =  {
     method: 'post',
     headers: HEADERS,
@@ -229,7 +324,7 @@ function createDummy(collectionName, ids) {
     .then(json => {
       const dummySuid = json.networkSUID;
       console.log(dummySuid);
-      importAll(collectionName, ids, dummySuid);
+      importAll(collectionName, ids, dummySuid, privateNetworks);
     });
 }
 
