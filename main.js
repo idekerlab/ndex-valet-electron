@@ -155,8 +155,8 @@ function initSocket() {
           break;
         case "save":
           opts = msgObj.options;
-          LOGGER.log("debug", 'Fire2: Got Save Params: ' + opts);
-          mainWindow.setTitle('Save to NDEx: ' + opts.name);
+          // LOGGER.log("debug", 'Fire2: Got Save Params: ' + opts);
+          // mainWindow.setTitle('Save to NDEx: ' + opts.name);
           break;
       }
     };
