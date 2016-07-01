@@ -5,6 +5,9 @@ const {ipcRenderer} = require('electron');
 // Main browser window
 const win = remote.getCurrentWindow();
 
+const CATEGORY_TAG = 'CyCatagory';
+
+
 const THEME = {
   palette: {
     primary1Color: '#6E93B6',
@@ -63,8 +66,8 @@ function getTable() {
     }
   };
 
-  const rootSUID = options.rootSUID;
-  const url = 'http://localhost:1234/v1/collections/' + rootSUID + '/tables/default';
+  const suid = options.SUID;
+  const url = 'http://localhost:1234/v1/networks/' + suid + '/tables/defaultnetwork';
 
   console.log(options);
 
@@ -88,20 +91,26 @@ function getTable() {
 function processTable(table) {
   const entries = table.rows[0];
   console.log(entries);
+
   const keys = Object.keys(entries);
-  const newKeys = keys.map(key=>{
-    return 'CyCatagory:Sample 1:' + key;
+
+  const filtered = {};
+
+  keys.map(key => {
+    console.log('Key------------');
+    console.log(key);
+    if(key.startsWith(CATEGORY_TAG)) {
+      filtered[key] = entries[key];
+    }
   });
-  console.log(newKeys);
-  const vals = {
-    'CyCatagory:Sample 1:data source': 'IntAct',
-    'CyCatagory:Sample 1:description': 'PPI network for yeast',
-    'CyCatagory:Sample 1:related pathways': 'Glycolysis / Gluconeogenesis, Citrate cycle (TCA cycle), Pentose phosphate pathway'
-  };
-  return vals;
+
+  console.log('---------filtered------------');
+  console.log(filtered);
+
+  return filtered;
 }
 
-function createTable(props) {
+function createTable(props, suid) {
 
   const params = {
     key:"SUID",
@@ -110,7 +119,7 @@ function createTable(props) {
   };
 
   const entry = {
-    SUID: parseInt(options.rootSUID, 10)
+    SUID: parseInt(suid, 10)
   };
 
   const keys = Object.keys(props);
@@ -119,11 +128,78 @@ function createTable(props) {
     const val = props[key];
     if(val !== undefined && val !== null && val !== '') {
       console.log(val);
-      entry[key] = val[0];
+      entry[key] = val;
     }
   }
   params.data.push(entry);
   return params;
+}
+
+
+function getSubnetworkList(rootSuid, newProps) {
+  const params = {
+    method: 'get',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+
+  const url = 'http://localhost:1234/v1/collections/' + rootSuid + '/subnetworks';
+
+  fetch(url, params)
+    .then(response => {
+      if (response.ok) {
+        console.log('==Got Subnetwork List:');
+
+        return response.json();
+      } else {
+        dialog.showMessageBox(win, MSG_ERROR_CYREST, () => {
+          win.close();
+        });
+      }
+    }).then(suids => {
+
+      console.log(suids); // array of SUID;
+
+      Promise.all(suids.map(suid => {
+        const data = createTable(newProps, suid);
+        updateSubTables(suid, data);
+      })).then((responses2)=>{
+
+        console.log(responses2);
+        console.log('------ finished -----');
+
+        postCollection();  //Finally, post everything to NDEx
+      });
+      // for (let suid of suids) {
+      //   const data = createTable(newProps, suid);
+      //   updateSubTables(suid, data);
+      // }
+  });
+
+}
+
+function updateSubTables(suid, data) {
+  const params = {
+    method: 'put',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  };
+  const url = 'http://localhost:1234/v1/networks/' + suid + '/tables/defaultnetwork';
+  console.log('==calling Sub');
+  return fetch(url, params);
+    // .then(response => {
+    //   if (response.ok) {
+    //     console.log('==Sub OK!');
+    //   } else {
+    //     console.log(response);
+    //     dialog.showMessageBox(win, MSG_ERROR_CYREST, () => {
+    //     });
+    //   }
+    // });
+
 }
 
 function updateCytoscape(data) {
@@ -152,7 +228,6 @@ function updateCytoscape(data) {
 
 
 function init(table) {
-  processTable(table);
 
   const cyto = CyFramework.config([NDExStore, NDExSave]);
 
@@ -166,13 +241,8 @@ function init(table) {
       console.log("@ SAVING...");
       console.log(newProps);
       console.log(isPublic);
-
-      const forPut = createTable(newProps);
-      console.log(forPut);
-      updateCytoscape(forPut);
-      console.log('----------- Done --------------');
-
-      // postCollection();
+      getSubnetworkList(options.rootSUID, newProps);
+      console.log('----------- Done2! --------------');
     }
   });
 }

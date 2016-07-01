@@ -25,7 +25,7 @@ const CLOSE_BUTTON_ID = 'close';
 
 const HEADERS = {
   Accept: 'application/json',
-    'Content-Type': 'application/json'
+  'Content-Type': 'application/json'
 };
 
 const CYREST = {
@@ -60,7 +60,7 @@ ipcRenderer.on('ping', (event, arg) => {
   const gl = remote.getGlobal('sharedObj');
   tempDir = gl.temp;
 
-  if(loginInfo === undefined || loginInfo === null || loginInfo === {}) {
+  if (loginInfo === undefined || loginInfo === null || loginInfo === {}) {
   } else {
     loginInfo['loggedIn'] = true;
     defaultState = Map(loginInfo);
@@ -133,7 +133,7 @@ function createNetworkList(idList, isPublic) {
   idList.map(id => {
 
     let source = null;
-    if(isPublic) {
+    if (isPublic) {
       source = server.serverAddress + '/rest/network/' + id + '/asCX';
     } else {
       // Private
@@ -177,14 +177,21 @@ function getNetworkSummary(id) {
   const credentials = defaultState.toJS();
   const url = credentials.serverAddress + '/rest/network/' + id.externalId;
 
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  };
+
+  if (credentials.userName !== undefined
+    && credentials.userName !== null && credentials.userName !== '') {
+    headers.Authorization = 'Basic ' + btoa(credentials.userName + ':' + credentials.userPass);
+  }
+
   const param = {
     method: 'get',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: 'Basic ' + btoa(credentials.userName + ':' + credentials.userPass)
-    }
+    headers: headers
   };
+
   console.log("# fetch called: " + id.externalId);
   return fetch(url, param);
 }
@@ -216,21 +223,23 @@ function importAsOneCollection(ids) {
 
   getSummaries(ids)
     .then(responses => {
-      return Promise.all(responses.map(rsp =>{return rsp.json();}));
+      return Promise.all(responses.map(rsp => {
+        return rsp.json();
+      }));
     })
     .then(res => {
       res.map(net => {
         // Check private or not
-        if(net.visibility === 'PRIVATE') {
+        if (net.visibility === 'PRIVATE') {
           privateNetworks.add(net.externalId);
         }
 
         const count = getSubnetworkCount(net);
-        if(count !== 0) {
+        if (count !== 0) {
           // Multiple networks
           collections[net.name] = [net.externalId];
         } else {
-          if(singleCollectionName === null) {
+          if (singleCollectionName === null) {
             singleCollectionName = net.name;
           }
           singles.push(net.externalId);
@@ -240,7 +249,7 @@ function importAsOneCollection(ids) {
     .then(() => {
       // Save all
       return Promise.all(ids.map(id => {
-        if(privateNetworks.has(id.externalId)) {
+        if (privateNetworks.has(id.externalId)) {
           fetchNetwork(id.externalId);
         }
       }));
@@ -271,7 +280,9 @@ function fetchNetwork(uuid) {
   const address = credentials.serverAddress;
   const url = address + '/rest/network/' + uuid + '/asCX';
   fetch(url, param)
-    .then(response => { return response.json(); })
+    .then(response => {
+      return response.json();
+    })
     .then(json => {
       storeFile(json, uuid + '.json');
     });
@@ -292,8 +303,12 @@ function importAll(collectionName, ids, dummy, privateNetworks) {
   });
 
   fetch(CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(publicNets, true))
-    .then(response => { return response.json(); })
-    .then(json => { applyLayout(json); })
+    .then(response => {
+      return response.json();
+    })
+    .then(json => {
+      applyLayout(json);
+    })
     .then(() => {
       fetch(CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(privateNets, false))
         .then(() => deleteDummy(dummy));
@@ -302,7 +317,7 @@ function importAll(collectionName, ids, dummy, privateNetworks) {
 
 
 function deleteDummy(dummy) {
-  const q =  {
+  const q = {
     method: 'delete',
     headers: HEADERS
   };
@@ -312,14 +327,16 @@ function deleteDummy(dummy) {
 }
 
 function createDummy(collectionName, ids, privateNetworks) {
-  const q =  {
+  const q = {
     method: 'post',
     headers: HEADERS,
     body: JSON.stringify(EMPTY_NET)
   };
 
   fetch('http://localhost:1234/v1/networks?collection=' + collectionName, q)
-    .then(response => { return response.json() })
+    .then(response => {
+      return response.json()
+    })
     .then(json => {
       const dummySuid = json.networkSUID;
       console.log(dummySuid);
@@ -347,7 +364,8 @@ function initWsConnection() {
     }
 
     switch (msg.type) {
-      case MESSAGE_TYPE.QUERY: {
+      case MESSAGE_TYPE.QUERY:
+      {
         const query = msg.body;
         cyto.dispatch(NDExValet.fieldActions.updateQuery(query));
         const store = cyto.getStore(STORE_NDEX);
@@ -355,7 +373,8 @@ function initWsConnection() {
         cyto.dispatch(NDExStore.luceneActions.searchFor(server, query));
         break;
       }
-      default: {
+      default:
+      {
         break;
       }
     }
@@ -388,7 +407,9 @@ function initCyComponent(serverState) {
     style: {
       backgroundColor: '#EDEDED'
     },
-    onLoad: ids => { importAsOneCollection(ids); }
+    onLoad: ids => {
+      importAsOneCollection(ids);
+    }
   });
 }
 
