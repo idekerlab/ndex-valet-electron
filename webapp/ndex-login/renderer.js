@@ -7,8 +7,8 @@ const WS_SERVER = 'ws://localhost:8025/ws/echo';
 
 const win = remote.getCurrentWindow();
 
-const DEF_SERVER = 'http://dev2.ndexbio.org';
-const DEF_NAME = "NDEx Dev 2";
+const DEF_SERVER = 'http://public.ndexbio.org';
+const DEF_NAME = "NDEx Public";
 
 const DEFAULTS = {
   userName: '',

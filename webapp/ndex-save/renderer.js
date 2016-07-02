@@ -11,11 +11,11 @@ const CATEGORY_TAG = 'CyCatagory';
 const THEME = {
   palette: {
     primary1Color: '#6E93B6',
-      primary2Color: '#244060',
-      primary3Color: '##EDEDED',
-      accent1Color: '#D69121',
-      accent2Color: '#E4E4E4',
-      accent3Color: '##9695A6'
+    primary2Color: '#244060',
+    primary3Color: '##EDEDED',
+    accent1Color: '#D69121',
+    accent2Color: '#E4E4E4',
+    accent3Color: '##9695A6'
   }
 };
 
@@ -102,7 +102,7 @@ function processTable(table) {
   keys.map(key => {
     console.log('Key------------');
     console.log(key);
-    if(key.startsWith(CATEGORY_TAG)) {
+    if (key.startsWith(CATEGORY_TAG)) {
       filtered[key] = entries[key];
     }
   });
@@ -116,7 +116,7 @@ function processTable(table) {
 function createTable(props, suid) {
 
   const params = {
-    key:"SUID",
+    key: "SUID",
     dataKey: "SUID",
     data: []
   };
@@ -129,7 +129,7 @@ function createTable(props, suid) {
   for (let key of keys) {
     console.log(key);
     const val = props[key];
-    if(val !== undefined && val !== null && val !== '') {
+    if (val !== undefined && val !== null && val !== '') {
       console.log(val);
       entry[key] = val;
     }
@@ -162,18 +162,18 @@ function getSubnetworkList(rootSuid, newProps) {
       }
     }).then(suids => {
 
-      console.log(suids); // array of SUID;
+    console.log(suids); // array of SUID;
 
-      Promise.all(suids.map(suid => {
-        const data = createTable(newProps, suid);
-        updateSubTables(suid, data);
-      })).then((responses2)=>{
+    Promise.all(suids.map(suid => {
+      const data = createTable(newProps, suid);
+      updateSubTables(suid, data);
+    })).then((responses2)=> {
 
-        console.log(responses2);
-        console.log('------ finished -----');
+      console.log(responses2);
+      console.log('------ finished -----');
 
-        postCollection();  //Finally, post everything to NDEx
-      });
+      postCollection();  //Finally, post everything to NDEx
+    });
   });
 
 }
@@ -285,12 +285,10 @@ function saveSuccess(ndexId) {
   const flagPrivate = 'PRIVATE';
   const flagPublic = 'PUBLIC';
 
-  let visibility = flagPublic;
+  let visibility = flagPrivate;
 
-  if(!isPublic) {
-    console.log("------------- This is PRIVATE!!!!!!!!!");
-    // This is a private network
-    visibility = flagPrivate;
+  if (isPublic) {
+    visibility = flagPublic;
   }
 
   const updateUrl = options.serverAddress + '/rest/network/' + ndexId + '/summary';
@@ -301,7 +299,7 @@ function saveSuccess(ndexId) {
       'Accept': 'application/json',
       Authorization: 'Basic ' + btoa(options.userName + ':' + options.userPass)
     },
-    body: JSON.stringify({ visibility: visibility })
+    body: JSON.stringify({visibility: visibility})
   };
 
   fetch(updateUrl, param)

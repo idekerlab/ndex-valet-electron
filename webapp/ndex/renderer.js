@@ -1,25 +1,9 @@
 const remote = require('electron').remote;
-const {Map} = require('immutable');
+const Immutable = require('immutable');
 const {ipcRenderer} = require('electron');
-
 const jsonfile = require('jsonfile');
 
-// For saving to local directory
-function storeFile(cx, fileName) {
-  const file = tempDir + fileName;
-  // const file = '/Users/kono/' + fileName;
-
-  jsonfile.writeFile(file, cx, err => {
-    if (err != null || err != undefined) {
-      console.error(err);
-    } else {
-      // OK
-    }
-  });
-}
-
-
-const WS_SERVER = 'ws://localhost:8025/ws/echo';
+const config = require('./config_browser');
 
 const CLOSE_BUTTON_ID = 'close';
 
@@ -28,19 +12,13 @@ const HEADERS = {
   'Content-Type': 'application/json'
 };
 
-const CYREST = {
-  IMPORT_NET: 'http://localhost:1234/v1/networks?format=cx&source=url'
-};
 
-const DEF_DEV_NAME = 'NDEx Dev 2';
-const DEF_DEV_SERVER = 'http://dev2.ndexbio.org';
-
-const DEF_PUBLIC_NAME = 'NDEx Public';
+const DEF_PUBLIC_NAME = 'NDEx Public Server';
 const DEF_PUBLIC_SERVER = 'http://public.ndexbio.org';
 
-let defaultState = Map({
-  serverName: DEF_DEV_NAME,
-  serverAddress: DEF_DEV_SERVER,
+let defaultState = Immutable.Map({
+  serverName: DEF_PUBLIC_NAME,
+  serverAddress: DEF_PUBLIC_SERVER,
   userName: "",
   userPass: "",
   loggedIn: false
@@ -48,7 +26,17 @@ let defaultState = Map({
 
 let tempDir;
 
-
+// For saving to local directory
+function storeFile(cx, fileName) {
+  const file = tempDir + fileName;
+  jsonfile.writeFile(file, cx, err => {
+    if (err != null || err != undefined) {
+      console.error(err);
+    } else {
+      // OK
+    }
+  });
+}
 // Get options from main process
 ipcRenderer.on('ping', (event, arg) => {
   console.log(arg);
@@ -63,7 +51,7 @@ ipcRenderer.on('ping', (event, arg) => {
   if (loginInfo === undefined || loginInfo === null || loginInfo === {}) {
   } else {
     loginInfo['loggedIn'] = true;
-    defaultState = Map(loginInfo);
+    defaultState = Immutable.Map(loginInfo);
   }
 
   startApp();
@@ -72,37 +60,9 @@ ipcRenderer.on('ping', (event, arg) => {
 // Name of the redux store
 const STORE_NDEX = 'ndex';
 
-const MESSAGES = {
-  CONNECT: {
-    from: 'ndex',
-    type: 'connected',
-    body: ''
-  },
 
-  ALIVE: {
-    from: 'ndex',
-    type: 'alive',
-    body: 'from renderer'
-  }
-};
-
-var MESSAGE_TYPE = {
+const MESSAGE_TYPE = {
   QUERY: 'query'
-};
-
-const ID_COLUMN = {
-  name: 'NDEX_UUID',
-  type: 'String',
-  immutable: true,
-  local: true
-};
-
-const EMPTY_NET = {
-  data: {},
-  elements: {
-    nodes: [],
-    edges: []
-  }
 };
 
 
@@ -302,7 +262,7 @@ function importAll(collectionName, ids, dummy, privateNetworks) {
     }
   });
 
-  fetch(CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(publicNets, true))
+  fetch(config.CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(publicNets, true))
     .then(response => {
       return response.json();
     })
@@ -310,7 +270,7 @@ function importAll(collectionName, ids, dummy, privateNetworks) {
       applyLayout(json);
     })
     .then(() => {
-      fetch(CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(privateNets, false))
+      fetch(config.CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(privateNets, false))
         .then(() => deleteDummy(dummy));
     });
 }
@@ -330,7 +290,7 @@ function createDummy(collectionName, ids, privateNetworks) {
   const q = {
     method: 'post',
     headers: HEADERS,
-    body: JSON.stringify(EMPTY_NET)
+    body: JSON.stringify(config.EMPTY_NET)
   };
 
   fetch('http://localhost:1234/v1/networks?collection=' + collectionName, q)
@@ -351,10 +311,10 @@ function init() {
 }
 
 function initWsConnection() {
-  cySocket = new WebSocket(WS_SERVER);
+  cySocket = new WebSocket(config.WS_SERVER);
 
   cySocket.onopen = () => {
-    cySocket.send(JSON.stringify(MESSAGES.CONNECT));
+    cySocket.send(JSON.stringify(config.MESSAGES.CONNECT));
   };
 
   cySocket.onmessage = event => {
@@ -382,7 +342,7 @@ function initWsConnection() {
 
   // Keep alive by sending notification...
   setInterval(function () {
-    cySocket.send(JSON.stringify(MESSAGES.ALIVE));
+    cySocket.send(JSON.stringify(config.MESSAGES.ALIVE));
   }, 120000);
 
 }
