@@ -58,6 +58,9 @@ const MSG_SUCCESS = {
 // Default parameters (credentials for the application)
 let options;
 
+// Current save option status (PUBLIC or PRIVATE)
+let isPublic = false;
+
 function getTable() {
   const params = {
     method: 'get',
@@ -171,10 +174,6 @@ function getSubnetworkList(rootSuid, newProps) {
 
         postCollection();  //Finally, post everything to NDEx
       });
-      // for (let suid of suids) {
-      //   const data = createTable(newProps, suid);
-      //   updateSubTables(suid, data);
-      // }
   });
 
 }
@@ -190,16 +189,6 @@ function updateSubTables(suid, data) {
   const url = 'http://localhost:1234/v1/networks/' + suid + '/tables/defaultnetwork';
   console.log('==calling Sub');
   return fetch(url, params);
-    // .then(response => {
-    //   if (response.ok) {
-    //     console.log('==Sub OK!');
-    //   } else {
-    //     console.log(response);
-    //     dialog.showMessageBox(win, MSG_ERROR_CYREST, () => {
-    //     });
-    //   }
-    // });
-
 }
 
 function updateCytoscape(data) {
@@ -237,8 +226,9 @@ function init(table) {
 
     properties: processTable(table),
 
-    onSave(newProps, isPublic) {
-      console.log("@ SAVING...");
+    onSave(newProps, publicButtonPressed) {
+      isPublic = publicButtonPressed;
+      console.log("SAVING back to NDEx...");
       console.log(newProps);
       console.log(isPublic);
       getSubnetworkList(options.rootSUID, newProps);
@@ -291,6 +281,18 @@ function postCx(rawCX) {
 }
 
 function saveSuccess(ndexId) {
+
+  const flagPrivate = 'PRIVATE';
+  const flagPublic = 'PUBLIC';
+
+  let visibility = flagPublic;
+
+  if(!isPublic) {
+    console.log("------------- This is PRIVATE!!!!!!!!!");
+    // This is a private network
+    visibility = flagPrivate;
+  }
+
   const updateUrl = options.serverAddress + '/rest/network/' + ndexId + '/summary';
   const param = {
     method: 'post',
@@ -299,7 +301,7 @@ function saveSuccess(ndexId) {
       'Accept': 'application/json',
       Authorization: 'Basic ' + btoa(options.userName + ':' + options.userPass)
     },
-    body: JSON.stringify({ visibility: 'PUBLIC' })
+    body: JSON.stringify({ visibility: visibility })
   };
 
   fetch(updateUrl, param)
