@@ -1,0 +1,12 @@
+.loading {
+    color: #777777;
+    font-weight: 300;
+    font-family: Roboto;
+    text-align: center;
+}
+
+img {
+    width: 200px;
+    display: block;
+    margin: auto;
+}
