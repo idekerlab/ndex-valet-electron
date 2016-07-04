@@ -1,7 +1,7 @@
 {
   "name": "ndex-valet-electron",
   "productName": "NDEx-Valet",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NDEx Valet desktop app using Electron",
   "main": "main.js",
   "scripts": {

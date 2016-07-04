@@ -102,6 +102,7 @@ function processTable(table) {
   keys.map(key => {
     console.log('Key------------');
     console.log(key);
+
     if (key.startsWith(CATEGORY_TAG)) {
       filtered[key] = entries[key];
     }
@@ -231,8 +232,9 @@ function init(table) {
       console.log("SAVING back to NDEx...");
       console.log(newProps);
       console.log(isPublic);
+
       getSubnetworkList(options.rootSUID, newProps);
-      console.log('----------- Done2! --------------');
+      console.log('----------- Done3! --------------');
     }
   });
 }
@@ -305,6 +307,10 @@ function saveSuccess(ndexId) {
   fetch(updateUrl, param)
     .then(response => {
       if (response.ok) {
+
+        // Save the image:
+        getImage(options.SUID, ndexId);
+
         dialog.showMessageBox(win, MSG_SUCCESS, () => {
           console.log('New Ndex ID: ' + ndexId);
           win.close();
@@ -334,6 +340,28 @@ function postCollection() {
   });
 }
 
+
+
+function getImage(suid, uuid) {
+  const url = 'http://localhost:1234/v1/networks/' + suid + '/views/first.png?h=1600';
+  const imageUrl = 'http://52.35.119.46:8081/image/png/' + uuid;
+
+  const oReq = new XMLHttpRequest();
+  oReq.open('GET', url, true);
+  oReq.responseType = 'blob';
+
+  oReq.onload = oEvent => {
+    // To image cache
+    const blob = oReq.response;
+    const pReq = new XMLHttpRequest();
+    pReq.open('POST', imageUrl, true);
+    pReq.onload = evt => {
+      console.log('--------------OK!');
+    };
+    pReq.send(blob);
+  };
+  oReq.send();
+}
 
 // Start the application whenever the required parameters are ready.
 ipcRenderer.on('ping', (event, arg) => {
