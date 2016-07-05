@@ -354,7 +354,7 @@ function showLoading() {
 }
 
 function getImage(suid, uuid) {
-  const url = 'http://localhost:1234/v1/networks/' + suid + '/views/first.png?h=1600';
+  const url = 'http://localhost:1234/v1/networks/' + suid + '/views/first.png?h=2000';
   const imageUrl = 'http://52.35.119.46:8081/image/png/' + uuid;
 
   const oReq = new XMLHttpRequest();
