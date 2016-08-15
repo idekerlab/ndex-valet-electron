@@ -1,9 +1,16 @@
 const remote = require('electron').remote;
 const dialog = require('electron').remote.dialog;
 const {ipcRenderer} = require('electron');
+const {BrowserWindow} = require('electron').remote;
 
 // Main browser window
 const win = remote.getCurrentWindow();
+
+// Dialog
+const child = new BrowserWindow({
+  parent: win, modal: true, show: false,
+  width: 400, height: 400
+});
 
 const CATEGORY_TAG = 'CyCatagory';
 
@@ -102,6 +109,7 @@ function processTable(table) {
   keys.map(key => {
     console.log('Key------------');
     console.log(key);
+
     if (key.startsWith(CATEGORY_TAG)) {
       filtered[key] = entries[key];
     }
@@ -228,18 +236,19 @@ function init(table) {
 
     onSave(newProps, publicButtonPressed) {
       isPublic = publicButtonPressed;
-      console.log("SAVING back to NDEx...");
       console.log(newProps);
       console.log(isPublic);
+
+      showLoading();
       getSubnetworkList(options.rootSUID, newProps);
-      console.log('----------- Done2! --------------');
+      console.log('----------- Done3! --------------');
     }
   });
 }
 
 function addCloseButton() {
   document.getElementById('close').addEventListener('click', () => {
-    remote.getCurrentWindow().close();
+    win.close();
   });
 }
 
@@ -305,10 +314,10 @@ function saveSuccess(ndexId) {
   fetch(updateUrl, param)
     .then(response => {
       if (response.ok) {
-        dialog.showMessageBox(win, MSG_SUCCESS, () => {
-          console.log('New Ndex ID: ' + ndexId);
-          win.close();
-        });
+
+        // Save the image:
+        getImage(options.SUID, ndexId);
+
       } else {
         saveFailed(response);
       }
@@ -318,6 +327,7 @@ function saveSuccess(ndexId) {
 function saveFailed(evt) {
   dialog.showMessageBox(win, MSG_ERROR, () => {
     console.log(evt);
+    child.close();
     win.close();
   });
 }
@@ -334,6 +344,36 @@ function postCollection() {
   });
 }
 
+function showLoading() {
+  const gl = remote.getGlobal('sharedObj');
+  const contentDir = gl.dir;
+  child.loadURL('file://' + contentDir + '/webapp/ndex-save/waiting/index.html');
+  child.once('ready-to-show', () => {
+    child.show();
+  });
+}
+
+function getImage(suid, uuid) {
+  const url = 'http://localhost:1234/v1/networks/' + suid + '/views/first.png?h=2000';
+  const imageUrl = 'http://52.35.119.46:8081/image/png/' + uuid;
+
+  const oReq = new XMLHttpRequest();
+  oReq.open('GET', url, true);
+  oReq.responseType = 'blob';
+
+  oReq.onload = oEvent => {
+    // To image cache
+    const blob = oReq.response;
+    const pReq = new XMLHttpRequest();
+    pReq.open('POST', imageUrl, true);
+    pReq.onload = evt => {
+      child.close();
+      win.close();
+    };
+    pReq.send(blob);
+  };
+  oReq.send();
+}
 
 // Start the application whenever the required parameters are ready.
 ipcRenderer.on('ping', (event, arg) => {

@@ -4,7 +4,7 @@ const DESKTOP = {
   minHeight: 400,
   minWidth: 500,
   frame: true,
-  alwaysOnTop: true
+  alwaysOnTop: false
 };
 
 module.exports = DESKTOP;

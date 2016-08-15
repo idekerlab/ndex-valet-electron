@@ -71,6 +71,8 @@ function initWindow(appType) {
   });
 
   const dir = `${__dirname}`;
+  global.sharedObj.dir = dir;
+  
   mainWindow.loadURL('file://' + dir + '/webapp/' + appType + '/index.html');
 
   // Emitted when the window is closed.

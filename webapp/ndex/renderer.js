@@ -219,7 +219,11 @@ function importAsOneCollection(ids) {
       const keys = Object.keys(collections);
       console.log(keys);
       keys.map(key => {
-        createDummy(key, collections[key], privateNetworks);
+        if(key === singleCollectionName) {
+          createDummy(key, collections[key], privateNetworks, true);
+        } else {
+          createDummy(key, collections[key], privateNetworks, false);
+        }
       });
     });
 }
@@ -248,7 +252,7 @@ function fetchNetwork(uuid) {
     });
 }
 
-function importAll(collectionName, ids, dummy, privateNetworks) {
+function importAll(collectionName, ids, dummy, privateNetworks, doLayout) {
 
   const publicNets = [];
   const privateNets = [];
@@ -267,7 +271,9 @@ function importAll(collectionName, ids, dummy, privateNetworks) {
       return response.json();
     })
     .then(json => {
-      applyLayout(json);
+      if(doLayout) {
+        applyLayout(json);
+      }
     })
     .then(() => {
       fetch(config.CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(privateNets, false))
@@ -286,7 +292,7 @@ function deleteDummy(dummy) {
 
 }
 
-function createDummy(collectionName, ids, privateNetworks) {
+function createDummy(collectionName, ids, privateNetworks, doLayout) {
   const q = {
     method: 'post',
     headers: HEADERS,
@@ -300,7 +306,7 @@ function createDummy(collectionName, ids, privateNetworks) {
     .then(json => {
       const dummySuid = json.networkSUID;
       console.log(dummySuid);
-      importAll(collectionName, ids, dummySuid, privateNetworks);
+      importAll(collectionName, ids, dummySuid, privateNetworks, doLayout);
     });
 }
 

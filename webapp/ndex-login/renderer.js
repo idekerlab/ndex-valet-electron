@@ -70,11 +70,9 @@ function init(loginInfo) {
 
     onSubmit: () => {
       const state = cyto.getStore('ndex').server.toJS();
-      console.log(state);
       connect(state);
     }
   });
-
 }
 
 

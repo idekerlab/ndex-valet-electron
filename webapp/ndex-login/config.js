@@ -1,6 +1,6 @@
 const DESKTOP = {
   width: 500,
-  height: 346,
+  height: 360,
   frame: true,
   alwaysOnTop: true,
   title: "Login to NDEx"
