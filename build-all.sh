@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 # Build Script for all 3 platforms
 rm -rf ../build
 
