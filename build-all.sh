@@ -38,12 +38,13 @@ cd -
 #cp NDEx-Valet-win32.zip ../ndex-valet/src/main/resources/ndex/
 #cd -
 #
-# For Windows: 64bit
-electron-packager . --platform=win32 --arch=x64 --out=../build
-cd ../build
-mv NDEx-Valet-win32-x64 NDEx-Valet-win64
-zip -r NDEx-Valet-win64.zip ./NDEx-Valet-win64
-rm -f ../ndex-valet/src/main/resources/ndex/NDEx-Valet-win64.zip
-cp NDEx-Valet-win64.zip ../ndex-valet/src/main/resources/ndex/
-
-cd -
+#
+## For Windows: 64bit
+#electron-packager . --platform=win32 --arch=x64 --out=../build
+#cd ../build
+#mv NDEx-Valet-win32-x64 NDEx-Valet-win64
+#zip -r NDEx-Valet-win64.zip ./NDEx-Valet-win64
+#rm -f ../ndex-valet/src/main/resources/ndex/NDEx-Valet-win64.zip
+#cp NDEx-Valet-win64.zip ../ndex-valet/src/main/resources/ndex/
+#
+#cd -

@@ -1,0 +1,15 @@
+[submodule "external-modules/CyFramework"]
+	path = external-modules/CyFramework
+	url = git@github.com:CyComponent/CyFramework.git
+[submodule "external-modules/NDExStore"]
+	path = external-modules/NDExStore
+	url = git@github.com:CyComponent/NDExStore.git
+[submodule "external-modules/NDExLogin"]
+	path = external-modules/NDExLogin
+	url = git@github.com:CyComponent/NDExLogin.git
+[submodule "external-modules/NDExSave"]
+	path = external-modules/NDExSave
+	url = git@github.com:CyComponent/NDExSave.git
+[submodule "external-modules/NDExValet"]
+	path = external-modules/NDExValet
+	url = git@github.com:CyComponent/NDExValet.git
