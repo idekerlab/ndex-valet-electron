@@ -9,12 +9,18 @@ const win = remote.getCurrentWindow();
 // Dialog
 const child = new BrowserWindow({
   parent: win, modal: true, show: false,
-  width: 400, height: 400
+  width: 400, height: 800
 });
 
-const CATEGORY_TAG = 'CyCatagory';
+const PRESET_PROPS = [
+  'networkName', 'private',
+  'author', 'organism',
+  'disease', 'tissue',
+  'rightsHolder', 'rights',
+  'reference','description'
+]
 
-
+// Color theme of the UI
 const THEME = {
   palette: {
     primary1Color: '#6E93B6',
@@ -24,19 +30,17 @@ const THEME = {
     accent2Color: '#E4E4E4',
     accent3Color: '##9695A6'
   }
-};
+}
 
 const STYLE = {
   backgroundColor: '#EDEDED'
-};
+}
 
-// Cytoscape preset properties
-const PRESET_NAME = 'name';
 
 const HEADERS = {
   'Accept': 'application/json',
   'Content-Type': 'application/json'
-};
+}
 
 const MSG_ERROR = {
   title: 'Save Error:',
@@ -54,32 +58,52 @@ const MSG_ERROR_CYREST = {
   detail: 'Failed.'
 };
 
-const MSG_SUCCESS = {
-  title: 'Save Success',
-  type: 'info',
-  buttons: ['OK'],
-  message: 'Network Collection Saved ',
-  detail: 'Successfully saved network collection to NDEx '
-};
 
 // Default parameters (credentials for the application)
 let options;
 
-// Current save option status (PUBLIC or PRIVATE)
-let isPublic = false;
+let isPrivate = true
 
+
+function fillForm(table) {
+  const row = table.rows[0];
+
+  return {
+    networkName: row.name,
+    private: true,
+    toggleDisabled: false,
+    author: row.author,
+    organism: row.organism,
+    disease: row.disease,
+    tissue: row.tissue,
+    rightsHolder: row.rightsHolder,
+    rights: row.rights,
+    reference: row.reference,
+    description: row.description,
+    theme: THEME,
+    style: STYLE,
+
+    onSave(newProps) {
+      console.log(newProps);
+      isPrivate = newProps.private
+      showLoading()
+      updateRootTable(options.rootSUID, newProps)
+    }
+  }
+}
+
+
+/**
+ * Import Collection table from Cytoscape
+ */
 function getTable() {
+
   const params = {
     method: 'get',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  };
+    headers: HEADERS
+  }
 
-  const suid = options.SUID;
-  const url = 'http://localhost:1234/v1/networks/' + suid + '/tables/defaultnetwork';
-
-  console.log(options);
+  const url = 'http://localhost:1234/v1/collections/' + options.rootSUID + '/tables/default'
 
   fetch(url, params)
     .then(response => {
@@ -92,40 +116,16 @@ function getTable() {
       }
     })
     .then(json => {
-      console.log(json.rows);
-      win.setTitle('Save Collection of Networks: ' + options.rootname);
+      win.setTitle('Save a Collection of Networks: ' + options.rootname);
       init(json);
     });
 }
 
-function processTable(table) {
-  const entries = table.rows[0];
-  console.log(entries);
 
-  const keys = Object.keys(entries);
-
-  const filtered = {};
-
-  keys.map(key => {
-    console.log('Key------------');
-    console.log(key);
-
-    if (key.startsWith(CATEGORY_TAG)) {
-      filtered[key] = entries[key];
-    }
-  });
-
-  console.log('---------filtered------------');
-  console.log(filtered);
-
-  return filtered;
-}
-
-function createTable(props, suid) {
-
+function createUpdateTable(props, suid) {
   const params = {
-    key: "SUID",
-    dataKey: "SUID",
+    key: 'SUID',
+    dataKey: 'SUID',
     data: []
   };
 
@@ -133,124 +133,53 @@ function createTable(props, suid) {
     SUID: parseInt(suid, 10)
   };
 
-  const keys = Object.keys(props);
-  for (let key of keys) {
+  for (let key of PRESET_PROPS) {
     console.log(key);
     const val = props[key];
     if (val !== undefined && val !== null && val !== '') {
-      console.log(val);
       entry[key] = val;
     }
   }
   params.data.push(entry);
+
   return params;
 }
 
 
-function getSubnetworkList(rootSuid, newProps) {
-  const params = {
-    method: 'get',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  };
-
-  const url = 'http://localhost:1234/v1/collections/' + rootSuid + '/subnetworks';
-
-  fetch(url, params)
-    .then(response => {
-      if (response.ok) {
-        console.log('==Got Subnetwork List:');
-
-        return response.json();
-      } else {
-        dialog.showMessageBox(win, MSG_ERROR_CYREST, () => {
-          win.close();
-        });
-      }
-    }).then(suids => {
-
-    console.log(suids); // array of SUID;
-
-    Promise.all(suids.map(suid => {
-      const data = createTable(newProps, suid);
-      updateSubTables(suid, data);
-    })).then((responses2)=> {
-
-      console.log(responses2);
-      console.log('------ finished -----');
-
-      postCollection();  //Finally, post everything to NDEx
-    });
-  });
-
-}
-
-function updateSubTables(suid, data) {
+/**
+ * Update the network table of the Collection
+ *
+ * @param rootSuid
+ * @param newProps
+ * @returns {*}
+ */
+function updateRootTable(rootSuid, newProps) {
+  const data = createUpdateTable(newProps, rootSuid);
   const params = {
     method: 'put',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: HEADERS,
     body: JSON.stringify(data)
-  };
-  const url = 'http://localhost:1234/v1/networks/' + suid + '/tables/defaultnetwork';
-  console.log('==calling Sub');
-  return fetch(url, params);
-}
+  }
 
-function updateCytoscape(data) {
-  const params = {
-    method: 'put',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  };
-
-  const rootSUID = options.rootSUID;
-  const url = 'http://localhost:1234/v1/collections/' + rootSUID + '/tables/default';
-
+  const url = 'http://localhost:1234/v1/collections/' + rootSuid + '/tables/default';
   fetch(url, params)
-    .then(response => {
-      if (response.ok) {
-        console.log('==OK!');
-      } else {
-        dialog.showMessageBox(win, MSG_ERROR_CYREST, () => {
-          win.close();
-        });
-      }
-    });
+    .then(postCollection());
 }
 
 
 function init(table) {
-
-  const cyto = CyFramework.config([NDExStore, NDExSave]);
-
-  cyto.render(NDExSave, document.getElementById('save'), {
-    theme: THEME,
-    style: STYLE,
-
-    properties: processTable(table),
-
-    onSave(newProps, publicButtonPressed) {
-      isPublic = publicButtonPressed;
-      console.log(newProps);
-      console.log(isPublic);
-
-      showLoading();
-      getSubnetworkList(options.rootSUID, newProps);
-      console.log('----------- Done3! --------------');
-    }
-  });
+  const cyto = CyFramework.config([NDExStore])
+  const params = fillForm(table)
+  cyto.render(NDExSave, document.getElementById('save'), params);
 }
+
 
 function addCloseButton() {
   document.getElementById('close').addEventListener('click', () => {
     win.close();
   });
 }
+
 
 function startApp() {
   addCloseButton();
@@ -294,10 +223,12 @@ function saveSuccess(ndexId) {
   const flagPrivate = 'PRIVATE';
   const flagPublic = 'PUBLIC';
 
-  let visibility = flagPrivate;
+  let visibility = flagPrivate
 
-  if (isPublic) {
-    visibility = flagPublic;
+  if (isPrivate) {
+    visibility = flagPrivate
+  } else {
+    visibility = flagPublic
   }
 
   const updateUrl = options.serverAddress + '/rest/network/' + ndexId + '/summary';
@@ -314,9 +245,12 @@ function saveSuccess(ndexId) {
   fetch(updateUrl, param)
     .then(response => {
       if (response.ok) {
+        // Assign UUID
+        assignNdexId(ndexId)
 
         // Save the image:
         getImage(options.SUID, ndexId);
+
 
       } else {
         saveFailed(response);
@@ -326,14 +260,37 @@ function saveSuccess(ndexId) {
 
 function saveFailed(evt) {
   dialog.showMessageBox(win, MSG_ERROR, () => {
-    console.log(evt);
     child.close();
     win.close();
   });
 }
 
+function assignNdexId(uuid) {
+  // This should be assigned to the collection, not an individual network.
+
+  const data = {
+    key: 'SUID',
+    dataKey: 'SUID',
+    data: [
+      {
+        SUID: parseInt(options.rootSUID, 10),
+        uuid: uuid
+      }
+    ]
+  }
+
+  const params = {
+    method: 'put',
+    headers: HEADERS,
+    body: JSON.stringify(data)
+  }
+
+  const url = 'http://localhost:1234/v1/collections/' + options.rootSUID + '/tables/default';
+  fetch(url, params);
+}
+
 function postCollection() {
-  const cxUrl = 'http://localhost:1234/v1/collections/' + options.SUID;
+  const cxUrl = 'http://localhost:1234/v1/collections/' + options.rootSUID;
   fetch(cxUrl, {
     method: 'get',
     headers: HEADERS,
@@ -355,7 +312,7 @@ function showLoading() {
 
 function getImage(suid, uuid) {
   const url = 'http://localhost:1234/v1/networks/' + suid + '/views/first.png?h=2000';
-  const imageUrl = 'http://52.35.119.46:8081/image/png/' + uuid;
+  const imageUrl = 'http://ci-dev-serv.ucsd.edu:8081/image/png/' + uuid;
 
   const oReq = new XMLHttpRequest();
   oReq.open('GET', url, true);
@@ -368,7 +325,7 @@ function getImage(suid, uuid) {
     pReq.open('POST', imageUrl, true);
     pReq.onload = evt => {
       child.close();
-      win.close();
+      //win.close();
     };
     pReq.send(blob);
   };
