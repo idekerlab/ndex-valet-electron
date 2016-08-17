@@ -9,7 +9,7 @@ const win = remote.getCurrentWindow();
 // Dialog
 const child = new BrowserWindow({
   parent: win, modal: true, show: false,
-  width: 400, height: 800
+  width: 400, height: 400
 });
 
 const PRESET_PROPS = [
@@ -46,7 +46,7 @@ const MSG_ERROR = {
   title: 'Save Error:',
   type: 'error',
   buttons: ['Close'],
-  message: 'Saving Failed, ',
+  message: 'Failed to save file, ',
   detail: 'Failed.'
 };
 
@@ -201,12 +201,24 @@ function postCx(rawCX) {
   FD.append('CXNetworkStream', blob);
 
   XHR.addEventListener('load', evt => {
+    console.log('Load listener:')
+    console.log(evt);
+
+    const resCode = evt.target.status
+
+    console.log(resCode)
+    if(resCode !== 200) {
+      // Failed to load.
+      saveFailed(evt)
+      return
+    }
+
     const newNdexId = evt.target.response;
-    console.log(newNdexId);
     saveSuccess(newNdexId);
   });
 
   XHR.addEventListener('error', evt => {
+    console.log('!!!!!!!!!!ERR listener:')
     console.log(evt);
     saveFailed(evt);
   });
@@ -259,8 +271,16 @@ function saveSuccess(ndexId) {
 }
 
 function saveFailed(evt) {
-  dialog.showMessageBox(win, MSG_ERROR, () => {
-    child.close();
+  console.log('******** ERROR2 *********')
+  console.log(evt)
+
+  const errorMsg = MSG_ERROR
+  errorMsg.detail = evt.target.response
+  child.close()
+
+  console.log(dialog)
+
+  dialog.showMessageBox(errorMsg, () => {
     win.close();
   });
 }

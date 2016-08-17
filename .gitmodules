@@ -13,3 +13,9 @@
 [submodule "external-modules/NDExValet"]
 	path = external-modules/NDExValet
 	url = git@github.com:CyComponent/NDExValet.git
+[submodule "external-modules/NDExValetFinder"]
+	path = external-modules/NDExValetFinder
+	url = git@github.com:CyComponent/NDExValetFinder.git
+[submodule "external-modules/NDExPlugins"]
+	path = external-modules/NDExPlugins
+	url = git@github.com:CyComponent/NDExPlugins.git

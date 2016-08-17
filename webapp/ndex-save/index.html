@@ -12,7 +12,6 @@
   <script src="NDExSave/NDExSave.js"></script>
 
   <!--Electron only dependency-->
-  <link rel="stylesheet" href="../../css/photon.min.css">
   <link rel="stylesheet" href="../../css/save.css">
 </head>
 
@@ -20,9 +19,11 @@
 <div id="save"></div>
 
 <div id="button-bar" class="toolbar-actions">
-  <button id="close" class="btn btn-default pull-right">
-    Cancel
-  </button>
+  <div class="flex-container">
+    <button id="close">
+      Cancel
+    </button>
+  </div>
 </div>
 
 <script src="renderer.js"></script>

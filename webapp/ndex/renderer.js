@@ -333,7 +333,7 @@ function initWsConnection() {
       case MESSAGE_TYPE.QUERY:
       {
         const query = msg.body;
-        cyto.dispatch(NDExValet.fieldActions.updateQuery(query));
+        cyto.dispatch(NDExValetFinder.fieldActions.updateQuery(query));
         const store = cyto.getStore(STORE_NDEX);
         const server = store.server.toJS();
         cyto.dispatch(NDExStore.luceneActions.searchFor(server, query));
@@ -354,12 +354,12 @@ function initWsConnection() {
 }
 
 function initCyComponent(serverState) {
-  cyto = CyFramework.config([NDExValet, NDExStore], {
-    ndex: {
-      server: serverState
-    }
-  });
-  cyto.render(NDExValet, document.getElementById('valet'), {
+  console.log('---------- phase 1 -------------')
+  cyto = CyFramework.config([NDExStore]);
+  console.log('---------- phase 2 -------------')
+  console.log(NDExValetFinder)
+
+  cyto.render(NDExValetFinder, document.getElementById('valet'), {
     theme: {
       palette: {
         primary1Color: '#6E93B6',
@@ -373,6 +373,8 @@ function initCyComponent(serverState) {
     style: {
       backgroundColor: '#EDEDED'
     },
+    filters: [NDExPlugins.Filters.TextBox],
+    visualizations: [NDExPlugins.NetworkViz.CardLarge],
     onLoad: ids => {
       importAsOneCollection(ids);
     }

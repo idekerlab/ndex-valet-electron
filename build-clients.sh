@@ -22,10 +22,16 @@ npm run build
 cp build/NDExLogin.js ../../webapp/ndex-login/NDExLogin/
 cd -
 
-cd ./external-modules/NDExValet/
+cd ./external-modules/NDExPlugins/
 npm update && npm install
 npm run build
-cp build/NDExValet.js ../../webapp/ndex/NDExValet/
+cp build/NDExPlugins.js ../../webapp/ndex/NDExPlugins/
+cd -
+
+cd ./external-modules/NDExValetFinder/
+npm update && npm install
+npm run build
+cp build/NDExValetFinder.js ../../webapp/ndex/NDExValetFinder/
 cd -
 
 cd ./external-modules/NDExSave/
