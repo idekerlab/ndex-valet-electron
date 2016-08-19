@@ -6,7 +6,7 @@ const {BrowserWindow} = require('electron').remote;
 // Main browser window
 const win = remote.getCurrentWindow();
 
-// Dialog
+// For loading animation
 const child = new BrowserWindow({
   parent: win, modal: true, show: false,
   width: 400, height: 400
@@ -111,7 +111,7 @@ function getTable() {
         return response.json();
       } else {
         dialog.showMessageBox(win, MSG_ERROR_CYREST, () => {
-          win.close();
+          win.close()
         });
       }
     })
@@ -137,7 +137,7 @@ function createUpdateTable(props, suid) {
     console.log(key);
     const val = props[key];
     if (val !== undefined && val !== null && val !== '') {
-      entry[key] = val;
+        entry[key] = val;
     }
   }
   params.data.push(entry);
@@ -263,7 +263,7 @@ function saveSuccess(ndexId) {
         // Save the image:
         getImage(options.SUID, ndexId);
 
-
+        win.close()
       } else {
         saveFailed(response);
       }
@@ -281,7 +281,7 @@ function saveFailed(evt) {
   console.log(dialog)
 
   dialog.showMessageBox(errorMsg, () => {
-    win.close();
+    win.close()
   });
 }
 
@@ -344,8 +344,8 @@ function getImage(suid, uuid) {
     const pReq = new XMLHttpRequest();
     pReq.open('POST', imageUrl, true);
     pReq.onload = evt => {
-      child.close();
-      //win.close();
+      child.close()
+      win.close()
     };
     pReq.send(blob);
   };

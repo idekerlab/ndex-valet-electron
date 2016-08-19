@@ -12,7 +12,6 @@ const HEADERS = {
   'Content-Type': 'application/json'
 };
 
-
 const DEF_PUBLIC_NAME = 'NDEx Public Server';
 const DEF_PUBLIC_SERVER = 'http://public.ndexbio.org';
 
@@ -132,7 +131,6 @@ function applyLayout(results) {
 }
 
 
-// Use first entry as its collection name
 function getNetworkSummary(id) {
   const credentials = defaultState.toJS();
   const url = credentials.serverAddress + '/rest/network/' + id.externalId;
@@ -156,8 +154,10 @@ function getNetworkSummary(id) {
   return fetch(url, param);
 }
 
+
 function getSummaries(ids) {
-  return Promise.all(ids.map(getNetworkSummary));
+  const idList = Object.keys(ids).map(key => {return ids[key]})
+  return Promise.all(idList.map(getNetworkSummary));
 }
 
 
@@ -175,11 +175,15 @@ function getSubnetworkCount(net) {
 }
 
 function importAsOneCollection(ids) {
+  console.log('* Importing the networks:')
+  console.log(ids)
+
   let singleCollectionName = null;
   const collections = {};
   const singles = [];
 
   const privateNetworks = new Set();
+  const idList = Object.keys(ids).map(key => {return ids[key]})
 
   getSummaries(ids)
     .then(responses => {
@@ -208,7 +212,7 @@ function importAsOneCollection(ids) {
     })
     .then(() => {
       // Save all
-      return Promise.all(ids.map(id => {
+      return Promise.all(idList.map(id => {
         if (privateNetworks.has(id.externalId)) {
           fetchNetwork(id.externalId);
         }
@@ -218,18 +222,11 @@ function importAsOneCollection(ids) {
       collections[singleCollectionName] = singles;
       const keys = Object.keys(collections);
       console.log(keys);
-      keys.map(key => {
-        if(key === singleCollectionName) {
-          createDummy(key, collections[key], privateNetworks, true);
-        } else {
-          createDummy(key, collections[key], privateNetworks, false);
-        }
-      });
+      importAll(idList, privateNetworks, true);
     });
 }
 
 function fetchNetwork(uuid) {
-
   const credentials = defaultState.toJS();
 
   const param = {
@@ -252,12 +249,18 @@ function fetchNetwork(uuid) {
     });
 }
 
-function importAll(collectionName, ids, dummy, privateNetworks, doLayout) {
+function importAll(ids, privateNetworks, doLayout) {
+
+  console.log("$$$ ID List");
+  console.log(ids)
+
 
   const publicNets = [];
   const privateNets = [];
 
-  ids.map(id => {
+  ids.map(idObj => {
+    const id = idObj.externalId
+
     if (privateNetworks.has(id)) {
       privateNets.push(id);
     } else {
@@ -266,7 +269,7 @@ function importAll(collectionName, ids, dummy, privateNetworks, doLayout) {
     }
   });
 
-  fetch(config.CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(publicNets, true))
+  fetch(config.CYREST.IMPORT_NET, getImportQuery(publicNets, true))
     .then(response => {
       return response.json();
     })
@@ -276,39 +279,38 @@ function importAll(collectionName, ids, dummy, privateNetworks, doLayout) {
       }
     })
     .then(() => {
-      fetch(config.CYREST.IMPORT_NET + '&collection=' + collectionName, getImportQuery(privateNets, false))
-        .then(() => deleteDummy(dummy));
+      fetch(config.CYREST.IMPORT_NET, getImportQuery(privateNets, false));
     });
 }
 
 
-function deleteDummy(dummy) {
-  const q = {
-    method: 'delete',
-    headers: HEADERS
-  };
+// function deleteDummy(dummy) {
+//   const q = {
+//     method: 'delete',
+//     headers: HEADERS
+//   };
+//
+//   fetch('http://localhost:1234/v1/networks/' + dummy, q);
+//
+// }
 
-  fetch('http://localhost:1234/v1/networks/' + dummy, q);
-
-}
-
-function createDummy(collectionName, ids, privateNetworks, doLayout) {
-  const q = {
-    method: 'post',
-    headers: HEADERS,
-    body: JSON.stringify(config.EMPTY_NET)
-  };
-
-  fetch('http://localhost:1234/v1/networks?collection=' + collectionName, q)
-    .then(response => {
-      return response.json()
-    })
-    .then(json => {
-      const dummySuid = json.networkSUID;
-      console.log(dummySuid);
-      importAll(collectionName, ids, dummySuid, privateNetworks, doLayout);
-    });
-}
+// function createDummy(collectionName, ids, privateNetworks, doLayout) {
+//   const q = {
+//     method: 'post',
+//     headers: HEADERS,
+//     body: JSON.stringify(config.EMPTY_NET)
+//   };
+//
+//   fetch('http://localhost:1234/v1/networks?collection=' + collectionName, q)
+//     .then(response => {
+//       return response.json()
+//     })
+//     .then(json => {
+//       const dummySuid = json.networkSUID;
+//       console.log(dummySuid);
+//       importAll(collectionName, ids, dummySuid, privateNetworks, doLayout);
+//     });
+// }
 
 function init() {
   initCyComponent(defaultState);
@@ -354,11 +356,11 @@ function initWsConnection() {
 }
 
 function initCyComponent(serverState) {
-  console.log('---------- phase 1 -------------')
-  cyto = CyFramework.config([NDExStore]);
-  console.log('---------- phase 2 -------------')
-  console.log(NDExValetFinder)
-
+  cyto = CyFramework.config([NDExStore], {
+    ndex: {
+      server: serverState
+    }
+  });
   cyto.render(NDExValetFinder, document.getElementById('valet'), {
     theme: {
       palette: {
@@ -374,7 +376,11 @@ function initCyComponent(serverState) {
       backgroundColor: '#EDEDED'
     },
     filters: [NDExPlugins.Filters.TextBox],
-    visualizations: [NDExPlugins.NetworkViz.CardLarge],
+    visualizations: [
+      NDExPlugins.NetworkViz.NetworkTable,
+      NDExPlugins.NetworkViz.CardSmall,
+      NDExPlugins.NetworkViz.CardLarge
+    ],
     onLoad: ids => {
       importAsOneCollection(ids);
     }
