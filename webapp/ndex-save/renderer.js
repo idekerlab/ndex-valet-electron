@@ -63,12 +63,15 @@ const MSG_ERROR_CYREST = {
 let options;
 
 let isPrivate = true
+let existingUuid = null
 
 
 function fillForm(table) {
   const row = table.rows[0];
+  existingUuid = row['ndex:uuid']
 
   return {
+    UUID: row['ndex:uuid'],
     networkName: row.name,
     private: true,
     toggleDisabled: false,
@@ -137,7 +140,11 @@ function createUpdateTable(props, suid) {
     console.log(key);
     const val = props[key];
     if (val !== undefined && val !== null && val !== '') {
-        entry[key] = val;
+        if(key === 'networkName') {
+          entry['name'] = val;
+        } else {
+          entry[key] = val;
+        }
     }
   }
   params.data.push(entry);
@@ -191,8 +198,14 @@ function postCx(rawCX) {
   const ndexServerAddress = options.serverAddress;
   const id = options.userName;
   const pass = options.userPass;
+  let isUpdate = false
 
-  const url = ndexServerAddress + '/rest/network/asCX';
+  let url = ndexServerAddress + '/rest/network/asCX';
+  if(existingUuid !== null && existingUuid !== undefined) {
+    url = url + '/' + existingUuid
+    isUpdate = true
+  }
+
   const XHR = new XMLHttpRequest();
   const FD = new FormData();
   const content = JSON.stringify(rawCX);
@@ -223,7 +236,11 @@ function postCx(rawCX) {
     saveFailed(evt);
   });
 
-  XHR.open('POST', url);
+  if(isUpdate) {
+    XHR.open('PUT', url);
+  } else {
+    XHR.open('POST', url);
+  }
 
   const auth = 'Basic ' + btoa(id + ':' + pass);
   XHR.setRequestHeader('Authorization', auth);
