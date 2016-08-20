@@ -1,6 +1,7 @@
 const WS_SERVER = 'ws://localhost:8025/ws/echo';
 const CYREST = {
-  IMPORT_NET: 'http://localhost:1234/v1/networks?format=cx&source=url'
+  IMPORT_NET: 'http://localhost:1234/v1/networks?format=cx&source=url',
+  COLLECTIONS: 'http://localhost:1234/v1/collections'
 };
 
 const MESSAGES = {

@@ -83,35 +83,25 @@ function addCloseButton() {
 let cySocket;
 
 
+/**
+ * Create list of URLs for calling POST /v1/networks?source=url API
+ *
+ * @param idList
+ * @param isPublic
+ *
+ * @returns {*}
+ */
 function createNetworkList(idList, isPublic) {
-  let list = [];
-
-  const store = cyto.getStore(STORE_NDEX);
-  const server = store.server.toJS();
-
-  idList.map(id => {
-
-    let source = null;
+  const server = cyto.getStore(STORE_NDEX).server.toJS();
+  return idList.map(id => {
     if (isPublic) {
-      source = server.serverAddress + '/rest/network/' + id + '/asCX';
+      return server.serverAddress + '/rest/network/' + id + '/asCX';
     } else {
-      // Private
-      source = 'file://' + tempDir + id + '.json';
-      console.log(source);
+      return 'file://' + tempDir + id + '.json';
     }
-
-    console.log('============= Creating entry');
-    console.log(source);
-
-    let entry = {
-      source_location: source,
-      source_method: 'GET',
-      ndex_uuid: id
-    };
-    list.push(entry);
-  });
-  return list;
+  })
 }
+
 
 function getImportQuery(ids, isPublic) {
   return {
@@ -156,8 +146,7 @@ function getNetworkSummary(id) {
 
 
 function getSummaries(ids) {
-  const idList = Object.keys(ids).map(key => {return ids[key]})
-  return Promise.all(idList.map(getNetworkSummary));
+  return Promise.all(ids.map(getNetworkSummary));
 }
 
 
@@ -174,18 +163,20 @@ function getSubnetworkCount(net) {
   return subnets.size;
 }
 
-function importAsOneCollection(ids) {
-  console.log('* Importing the networks:')
-  console.log(ids)
 
-  let singleCollectionName = null;
-  const collections = {};
-  const singles = [];
-
+/**
+ *
+ * Import networks as individual collections
+ *
+ * @param ids
+ */
+function importCollections(ids, toSingleCollection) {
   const privateNetworks = new Set();
   const idList = Object.keys(ids).map(key => {return ids[key]})
 
-  getSummaries(ids)
+  let collectionName = null;
+
+  getSummaries(idList)
     .then(responses => {
       return Promise.all(responses.map(rsp => {
         return rsp.json();
@@ -193,41 +184,42 @@ function importAsOneCollection(ids) {
     })
     .then(res => {
       res.map(net => {
+        console.log('__SUMMARY:')
+        console.log(net);
+        if(collectionName === null) {
+          collectionName = net.name
+        }
+
         // Check private or not
         if (net.visibility === 'PRIVATE') {
           privateNetworks.add(net.externalId);
         }
-
-        const count = getSubnetworkCount(net);
-        if (count !== 0) {
-          // Multiple networks
-          collections[net.name] = [net.externalId];
-        } else {
-          if (singleCollectionName === null) {
-            singleCollectionName = net.name;
-          }
-          singles.push(net.externalId);
-        }
       });
     })
     .then(() => {
-      // Save all
+      // Download all private networks into temp dir.
       return Promise.all(idList.map(id => {
         if (privateNetworks.has(id.externalId)) {
           fetchNetwork(id.externalId);
         }
-      }));
+      }))
     })
     .then(() => {
-      collections[singleCollectionName] = singles;
-      const keys = Object.keys(collections);
-      console.log(keys);
-      importAll(idList, privateNetworks, true);
+      // Import both private and public networks at once.
+      importAll(toSingleCollection, collectionName, idList, privateNetworks, true);
     });
 }
 
+
+/**
+ * Download private networks into files
+ *
+ * @param uuid
+ */
 function fetchNetwork(uuid) {
   const credentials = defaultState.toJS();
+  const address = credentials.serverAddress;
+  const url = address + '/rest/network/' + uuid + '/asCX';
 
   const param = {
     method: 'get',
@@ -238,8 +230,6 @@ function fetchNetwork(uuid) {
     }
   };
 
-  const address = credentials.serverAddress;
-  const url = address + '/rest/network/' + uuid + '/asCX';
   fetch(url, param)
     .then(response => {
       return response.json();
@@ -249,12 +239,71 @@ function fetchNetwork(uuid) {
     });
 }
 
-function importAll(ids, privateNetworks, doLayout) {
 
-  console.log("$$$ ID List");
-  console.log(ids)
+function assignNdexId(suid, uuid) {
+
+  const param = {
+    method: 'get',
+    headers: HEADERS
+  }
+
+  const paramPut = {
+    method: 'put',
+    headers: HEADERS
+  }
+
+  // API to get SUID of the root network
+  const url = config.CYREST.COLLECTIONS + '?subsuid=' + suid
+
+  fetch(url, param)
+    .then(response => {
+      return response.json();
+    })
+    .then(rootIdArray => {
+      const rootId = rootIdArray[0]
+      const urlPost = config.CYREST.COLLECTIONS + '/' + rootId + '/tables/default'
+      paramPut.body = JSON.stringify(createAssignIdData(rootId, uuid))
+
+      fetch(urlPost, paramPut)
+    })
+}
+
+function createAssignIdData(suid, uuid) {
+  return {
+    key: 'SUID',
+    dataKey: 'SUID',
+    data: [
+      {
+        SUID: parseInt(suid, 10),
+        'ndex:uuid': uuid
+      }
+    ]
+  }
+}
 
 
+function setUUIDs(results) {
+  results.map(entry => {
+    // Array of SUIDs in the collection
+    const networkIdList = entry.networkSUID
+    const source = entry.source
+    const parts = source.split('/')
+
+    let uuid = null
+    if(parts[parts.length - 1] === 'asCX') {
+      uuid = parts[parts.length - 2]
+    } else {
+      uuid = parts[parts.length - 1].split('.')[0]
+    }
+    console.log('Assigning NDEx ID: ' + uuid)
+
+    assignNdexId(networkIdList[0], uuid)
+  })
+
+}
+
+
+function importAll(toSingleCollection, collectionName, ids, privateNetworks, doLayout) {
   const publicNets = [];
   const privateNets = [];
 
@@ -264,53 +313,37 @@ function importAll(ids, privateNetworks, doLayout) {
     if (privateNetworks.has(id)) {
       privateNets.push(id);
     } else {
-      console.log("$$$ Public");
       publicNets.push(id);
     }
   });
 
-  fetch(config.CYREST.IMPORT_NET, getImportQuery(publicNets, true))
+  let url = config.CYREST.IMPORT_NET
+  if(toSingleCollection) {
+    url = url + '&collection=' + collectionName
+  }
+
+  // Public collections
+  fetch(url, getImportQuery(publicNets, true))
     .then(response => {
       return response.json();
     })
     .then(json => {
-      if(doLayout) {
-        applyLayout(json);
-      }
+      setUUIDs(json);
     })
     .then(() => {
-      fetch(config.CYREST.IMPORT_NET, getImportQuery(privateNets, false));
-    });
+      // Private collections
+      fetch(url, getImportQuery(privateNets, false))
+        .then(response => {
+          return response.json();
+        })
+        .then(json => {
+          setUUIDs(json);
+        });
+    })
+
 }
 
 
-// function deleteDummy(dummy) {
-//   const q = {
-//     method: 'delete',
-//     headers: HEADERS
-//   };
-//
-//   fetch('http://localhost:1234/v1/networks/' + dummy, q);
-//
-// }
-
-// function createDummy(collectionName, ids, privateNetworks, doLayout) {
-//   const q = {
-//     method: 'post',
-//     headers: HEADERS,
-//     body: JSON.stringify(config.EMPTY_NET)
-//   };
-//
-//   fetch('http://localhost:1234/v1/networks?collection=' + collectionName, q)
-//     .then(response => {
-//       return response.json()
-//     })
-//     .then(json => {
-//       const dummySuid = json.networkSUID;
-//       console.log(dummySuid);
-//       importAll(collectionName, ids, dummySuid, privateNetworks, doLayout);
-//     });
-// }
 
 function init() {
   initCyComponent(defaultState);
@@ -381,8 +414,8 @@ function initCyComponent(serverState) {
       NDExPlugins.NetworkViz.CardSmall,
       NDExPlugins.NetworkViz.CardLarge
     ],
-    onLoad: ids => {
-      importAsOneCollection(ids);
+    onLoad: (ids, toSingleCollection) => {
+      importCollections(ids, toSingleCollection)
     }
   });
 }
