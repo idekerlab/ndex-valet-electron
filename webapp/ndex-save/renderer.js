@@ -12,6 +12,8 @@ const child = new BrowserWindow({
   width: 400, height: 400
 });
 
+const UUID_TAG = 'ndex:uuid'
+
 const PRESET_PROPS = [
   'networkName', 'private',
   'author', 'organism',
@@ -68,10 +70,13 @@ let existingUuid = null
 
 function fillForm(table) {
   const row = table.rows[0];
-  existingUuid = row['ndex:uuid']
+  existingUuid = row[UUID_TAG]
+
+  console.log('** uuid:')
+  console.log(row)
 
   return {
-    UUID: row['ndex:uuid'],
+    UUID: row[UUID_TAG],
     networkName: row.name,
     private: true,
     toggleDisabled: false,
@@ -288,14 +293,9 @@ function saveSuccess(ndexId) {
 }
 
 function saveFailed(evt) {
-  console.log('******** ERROR2 *********')
-  console.log(evt)
-
   const errorMsg = MSG_ERROR
   errorMsg.detail = evt.target.response
   child.close()
-
-  console.log(dialog)
 
   dialog.showMessageBox(errorMsg, () => {
     win.close()
@@ -311,7 +311,7 @@ function assignNdexId(uuid) {
     data: [
       {
         SUID: parseInt(options.rootSUID, 10),
-        uuid: uuid
+        "ndex:uuid": uuid
       }
     ]
   }

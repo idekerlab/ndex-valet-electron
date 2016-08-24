@@ -323,7 +323,13 @@ function importAll(toSingleCollection, collectionName, ids, privateNetworks, doL
   }
 
   // Public collections
-  fetch(url, getImportQuery(publicNets, true))
+  const q = getImportQuery(publicNets, true)
+  const qPrivate = getImportQuery(privateNets, false)
+
+  console.log(q)
+  console.log(qPrivate)
+
+  fetch(url, q)
     .then(response => {
       return response.json();
     })
